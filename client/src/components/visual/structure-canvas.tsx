@@ -55,6 +55,7 @@ export default function StructureCanvas({ model, onChange }: StructureCanvasProp
                 type="button"
                 data-testid={`canvas-up-${node.id}`}
                 title="Move left"
+                aria-label={`Move ${nodeLabel(node)} left`}
                 disabled={index === 0}
                 onClick={() => onChange(moveNode(model, node.id, index - 1))}
                 className="hover:text-white disabled:opacity-30"
@@ -65,6 +66,7 @@ export default function StructureCanvas({ model, onChange }: StructureCanvasProp
                 type="button"
                 data-testid={`canvas-down-${node.id}`}
                 title="Move right"
+                aria-label={`Move ${nodeLabel(node)} right`}
                 disabled={index === model.nodes.length - 1}
                 onClick={() => onChange(moveNode(model, node.id, index + 1))}
                 className="hover:text-white disabled:opacity-30"
@@ -76,6 +78,8 @@ export default function StructureCanvas({ model, onChange }: StructureCanvasProp
                   type="button"
                   data-testid={`canvas-mute-${node.id}`}
                   title={node.muted ? 'Unmute' : 'Mute'}
+                  aria-label={node.muted ? `Unmute ${nodeLabel(node)}` : `Mute ${nodeLabel(node)}`}
+                  aria-pressed={node.muted}
                   onClick={() => onChange(setMuted(model, node.id, !node.muted))}
                   className={node.muted ? 'text-red-400' : 'hover:text-white'}
                 >
@@ -86,6 +90,7 @@ export default function StructureCanvas({ model, onChange }: StructureCanvasProp
                 type="button"
                 data-testid={`canvas-duplicate-${node.id}`}
                 title="Duplicate"
+                aria-label={`Duplicate ${nodeLabel(node)}`}
                 onClick={() => onChange(duplicateNode(model, node.id))}
                 className="hover:text-white"
               >
@@ -95,6 +100,7 @@ export default function StructureCanvas({ model, onChange }: StructureCanvasProp
                 type="button"
                 data-testid={`canvas-remove-${node.id}`}
                 title="Remove"
+                aria-label={`Remove ${nodeLabel(node)}`}
                 onClick={() => onChange(removeNode(model, node.id))}
                 className="hover:text-red-400"
               >

@@ -174,10 +174,10 @@ export type StepTree =
   | { t: 'token'; value: string }
   | {
       t: 'group';
-      op: 'seq' | 'slow' | 'fast' | 'alt' | 'stack';
+      op: 'seq' | 'slow' | 'fast' | 'alt' | 'stack' | 'choice';
       factor?: number;
       children: StepTree[];
-      /** For `stack`: true when it is the row-level stack (no surrounding brackets). */
+      /** For `stack`/`choice`: true when it is the row-level group (no surrounding brackets). */
       top?: boolean;
     }
   | { t: 'euclid'; fill: number; steps: number; rotate?: number; child: StepTree }
@@ -190,6 +190,8 @@ export type PatternNode = GridPatternNode | RawPatternNode;
 export interface GridPatternNode extends RichNodeBase {
   kind: 'grid';
   rowKind: 'drum' | 'note';
+  /** The base factory function name (`s`, `sound`, `note`, `n`, `chord`). */
+  factory?: string;
   /** `.s("…")` sound/synth for note rows (drum rows carry the sample per step). */
   sound?: string;
   /** Top-level cells; length is the cycle length. A top-level `,` yields one

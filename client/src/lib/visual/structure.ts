@@ -93,11 +93,12 @@ export function parsePattern(text: string): GridPatternNode | null {
   let t = text.trim();
   if (t.startsWith('$:')) t = t.slice(2).trim();
 
-  const noteMatch = t.match(/^note\(\s*(["'])([\s\S]*?)\1\s*\)([\s\S]*)$/);
+  // note-like factories (pitch / index / chord)
+  const noteMatch = t.match(/^(note|n|chord)\(\s*(["'])([\s\S]*?)\2\s*\)([\s\S]*)$/);
   if (noteMatch) {
-    const cells = tryParseMini(noteMatch[2]);
+    const cells = tryParseMini(noteMatch[3]);
     if (!cells) return null;
-    let rest = noteMatch[3];
+    let rest = noteMatch[4];
     let sound = 'sawtooth';
     const soundMatch = rest.match(/^\s*\.s\(\s*(["'])([\s\S]*?)\1\s*\)/);
     if (soundMatch) {
@@ -106,16 +107,17 @@ export function parsePattern(text: string): GridPatternNode | null {
     }
     const effects = parseEffects(rest);
     if (!effects) return null;
-    return { kind: 'grid', id: '', rowKind: 'note', sound, steps: cells, effects };
+    return { kind: 'grid', id: '', rowKind: 'note', factory: noteMatch[1], sound, steps: cells, effects };
   }
 
-  const drumMatch = t.match(/^s\(\s*(["'])([\s\S]*?)\1\s*\)([\s\S]*)$/);
+  // drum-like factories (`s` / `sound`)
+  const drumMatch = t.match(/^(s|sound)\(\s*(["'])([\s\S]*?)\2\s*\)([\s\S]*)$/);
   if (drumMatch) {
-    const cells = tryParseMini(drumMatch[2]);
+    const cells = tryParseMini(drumMatch[3]);
     if (!cells) return null;
-    const effects = parseEffects(drumMatch[3]);
+    const effects = parseEffects(drumMatch[4]);
     if (!effects) return null;
-    return { kind: 'grid', id: '', rowKind: 'drum', steps: cells, effects };
+    return { kind: 'grid', id: '', rowKind: 'drum', factory: drumMatch[1], steps: cells, effects };
   }
 
   return null;
@@ -124,11 +126,15 @@ export function parsePattern(text: string): GridPatternNode | null {
 export function serializePattern(p: PatternNode): string {
   if (p.kind === 'raw-pattern') return p.code;
   const cellsStr = serializeCells(p.steps);
-  const base =
-    p.rowKind === 'note'
-      ? `note(${JSON.stringify(cellsStr)}).s(${JSON.stringify(p.sound || 'sawtooth')})`
-      : `s(${JSON.stringify(cellsStr)})`;
-  return base + p.effects.map(formatEffect).join('');
+  const effects = p.effects.map(formatEffect).join('');
+  if (p.rowKind === 'note') {
+    const factory = p.factory ?? 'note';
+    const sound = p.sound ?? (factory === 'n' ? undefined : 'sawtooth');
+    const base = sound !== undefined ? `${factory}(${JSON.stringify(cellsStr)}).s(${JSON.stringify(sound)})` : `${factory}(${JSON.stringify(cellsStr)})`;
+    return base + effects;
+  }
+  const factory = p.factory ?? 's';
+  return `${factory}(${JSON.stringify(cellsStr)})${effects}`;
 }
 
 // ---------------------------------------------------------------------------

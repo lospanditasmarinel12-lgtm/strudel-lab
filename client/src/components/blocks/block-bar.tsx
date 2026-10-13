@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { GripVertical, Grid3x3, Lock, Trash2, Eye, EyeOff } from 'lucide-react';
+import { GripVertical, Grid3x3, Lock, Trash2, Eye, EyeOff, Copy } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import type { ParsedBlock } from '@/lib/blocks/parse-blocks';
 import type { GridVisualRow } from '@/lib/visual/visual-model';
@@ -10,6 +10,8 @@ interface BlockBarProps {
   active?: boolean;
   onDragStart: (block: ParsedBlock, x: number, y: number) => void;
   onRemove: (block: ParsedBlock) => void;
+  onDuplicate: (block: ParsedBlock) => void;
+  onDropSample: (block: ParsedBlock, sample: string) => void;
   onGridChange: (block: ParsedBlock, row: GridVisualRow) => void;
 }
 
@@ -33,7 +35,7 @@ function StepPreview({ row }: { row: GridVisualRow }) {
   );
 }
 
-export default memo(function BlockBar({ block, active, onDragStart, onRemove, onGridChange }: BlockBarProps) {
+export default memo(function BlockBar({ block, active, onDragStart, onRemove, onDuplicate, onDropSample, onGridChange }: BlockBarProps) {
   const row = block.row;
   const label = row ? row.source : 'code';
 
@@ -42,6 +44,19 @@ export default memo(function BlockBar({ block, active, onDragStart, onRemove, on
       data-testid={`block-bar-${block.id}`}
       data-block-kind={block.kind}
       data-active={active ? '1' : '0'}
+      onDragOver={(e) => {
+        if (block.row && e.dataTransfer.types.includes('application/x-strudel-sample')) {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'copy';
+        }
+      }}
+      onDrop={(e) => {
+        const sample = e.dataTransfer.getData('application/x-strudel-sample');
+        if (sample && block.row) {
+          e.preventDefault();
+          onDropSample(block, sample);
+        }
+      }}
       className={`flex items-center gap-1.5 h-[24px] px-1.5 rounded-sm border bg-strudel-surface/95 text-white select-none ${
         active ? 'border-strudel-accent ring-1 ring-strudel-accent' : 'border-strudel-surface-light'
       }`}
@@ -61,7 +76,18 @@ export default memo(function BlockBar({ block, active, onDragStart, onRemove, on
         <GripVertical size={12} />
       </button>
 
-      {block.kind === 'raw' && <Lock size={10} className="text-muted-foreground shrink-0" />}
+      {block.kind === 'raw' &&
+        (block.advanced ? (
+          <span
+            data-testid={`block-advanced-${block.id}`}
+            className="text-[8px] font-mono px-1 rounded bg-strudel-dark text-strudel-accent shrink-0"
+            title="Advanced mini-notation (chords, euclid, groups) — editable in code"
+          >
+            grid+
+          </span>
+        ) : (
+          <Lock size={10} className="text-muted-foreground shrink-0" />
+        ))}
       <span className="text-[10px] font-mono truncate" title={label}>
         {label}
       </span>
@@ -116,6 +142,16 @@ export default memo(function BlockBar({ block, active, onDragStart, onRemove, on
         </Popover>
       )}
 
+      <button
+        type="button"
+        data-testid={`block-duplicate-${block.id}`}
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={() => onDuplicate(block)}
+        className="shrink-0 text-muted-foreground hover:text-white"
+        title="Duplicate block"
+      >
+        <Copy size={11} />
+      </button>
       <button
         type="button"
         data-testid={`block-remove-${block.id}`}

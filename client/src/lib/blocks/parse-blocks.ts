@@ -1,4 +1,5 @@
 import { codeToVisual } from '@/lib/visual/code-to-visual';
+import { parsePattern } from '@/lib/visual/structure';
 import { isGridRow, type GridVisualRow } from '@/lib/visual/visual-model';
 
 export type BlockKind = 'pattern' | 'raw' | 'comment';
@@ -14,6 +15,8 @@ export interface ParsedBlock {
   code: string;
   /** Present for `pattern` blocks: the parsed visual row (controls, effects). */
   row?: GridVisualRow;
+  /** Raw blocks that the newer codec *can* represent (tier-2 mini-notation). */
+  advanced?: boolean;
 }
 
 const MUTED_PREFIX = '// [muted]';
@@ -80,6 +83,7 @@ export function parseBlocks(code: string): ParsedBlock[] {
       endLine: end + 1,
       code: blockCode,
       row: isPattern ? (row as GridVisualRow) : undefined,
+      advanced: !isPattern && parsePattern(blockCode) !== null,
     });
   }
 

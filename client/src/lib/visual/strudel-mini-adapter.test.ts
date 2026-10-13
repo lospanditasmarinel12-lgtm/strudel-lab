@@ -85,4 +85,36 @@ describe('strudel-mini-adapter (authoritative parsing)', () => {
     expect(roundTrip('[g3,b3,e4]')).toBe('[g3, b3, e4]');
     expect(roundTrip('a b, c d')).toBe('a b, c d');
   });
+
+  it('parses random choice (`|`)', () => {
+    const nested = miniNotationToTree('[a|b|c]');
+    expect(nested).toHaveLength(1);
+    const g = nested[0] as Extract<StepTree, { t: 'group' }>;
+    expect(g.op).toBe('choice');
+    expect(g.top).toBeFalsy();
+
+    const top = miniNotationToTree('a | b');
+    expect(top).toHaveLength(1);
+    const t = top[0] as Extract<StepTree, { t: 'group' }>;
+    expect(t.op).toBe('choice');
+    expect(t.top).toBe(true);
+  });
+
+  it('serializes choice with/without brackets', () => {
+    expect(roundTrip('[a|b|c]')).toBe('[a | b | c]');
+    expect(roundTrip('a | b')).toBe('a | b');
+  });
+
+  it('treats `_` as elongation of the previous event', () => {
+    const cells = miniNotationToTree('a _ b');
+    expect(cells[0]).toEqual({ t: 'elongate', weight: 2, child: { t: 'token', value: 'a' } });
+    expect(cells[1]).toEqual({ t: 'token', value: 'b' });
+  });
+
+  it('treats newlines as whitespace (multi-line strings)', () => {
+    expect(miniNotationToTree('bd\nsd')).toEqual([
+      { t: 'token', value: 'bd' },
+      { t: 'token', value: 'sd' },
+    ]);
+  });
 });

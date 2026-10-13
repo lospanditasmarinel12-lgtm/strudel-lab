@@ -209,6 +209,26 @@ export default function BlockLayer({ editor, code, enabled }: BlockLayerProps) {
     [applyCode],
   );
 
+  const handleDuplicate = useCallback(
+    (block: ParsedBlock) => {
+      applyCode(insertBlock(codeRef.current, block.endLine + 1, block.code));
+    },
+    [applyCode],
+  );
+
+  const handleDropSample = useCallback(
+    (block: ParsedBlock, sample: string) => {
+      const row = block.row;
+      if (!row) return;
+      const next: GridVisualRow =
+        row.kind === 'drum'
+          ? { ...row, source: sample, steps: row.steps.map((s) => (s.on ? { on: true, value: sample } : s)) }
+          : { ...row, source: sample };
+      applyCode(replaceBlock(codeRef.current, block.startLine, block.endLine, visualRowToCode(next)));
+    },
+    [applyCode],
+  );
+
   const handleGridChange = useCallback(
     (block: ParsedBlock, row: GridVisualRow) => {
       applyCode(replaceBlock(codeRef.current, block.startLine, block.endLine, visualRowToCode(row)));
@@ -228,6 +248,8 @@ export default function BlockLayer({ editor, code, enabled }: BlockLayerProps) {
             active={block.id === activeBlockId}
             onDragStart={handleDragStart}
             onRemove={handleRemove}
+            onDuplicate={handleDuplicate}
+            onDropSample={handleDropSample}
             onGridChange={handleGridChange}
           />,
           dom,

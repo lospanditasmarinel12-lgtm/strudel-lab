@@ -533,8 +533,24 @@ section at the end of this file.
 - **Phase 5 (canvas + polish):** `structure-canvas.tsx` (reorder/mute/duplicate/remove/stack) wired
   behind a **CANVAS** toggle in `top-bar.tsx` + `studio.tsx`; legacy `pattern-visualizer.tsx`
   marked `@deprecated`.
-- Tests added: adapter, block-registry, structure-canvas. Result: **typecheck clean, lint 0 errors,
-  444 tests passing, build green.**
+- Tests added: adapter, block-registry, structure-canvas.
+
+### Follow-up completions
+- **Mini-notation completeness:** random choice `|` (new `choice` group), hold `_` (via weight →
+  elongate), and multi-line strings verified — in both the authoritative adapter and the local
+  parser; fuzz extended to cover `|`.
+- **Grid upgrades:** step-length selector (8/16/32) + clear in `block-grid-popover`; **duplicate
+  block** in `block-bar`/`block-layer`; **tier-2 `grid+` badge** on raw blocks the new codec can
+  represent (`parse-blocks` `advanced` flag).
+- **Live playhead:** `use-strudel-playhead` hook (real Strudel clock) highlights the active step.
+- **Drag UX:** drag a sample from the Samples panel onto a block to set its sample
+  (`application/x-strudel-sample`).
+- **Accessibility:** grid `role`/`aria-pressed`, canvas `aria-label`s.
+- **e2e:** `client/e2e/visual.spec.ts` (canvas toggle + node removal rewrites code).
+- **JS-layer (bounded):** preserve factory names (`s`/`sound`/`note`/`n`/`chord`); add `bank`
+  modifier. Function-valued args (`.jux(rev)`, `.off(...)`) still fall back to `raw`.
+
+Result: **typecheck clean, lint 0 errors, 451 tests passing, build green.**
 
 ### Phase 1 — delivered
 - `client/src/lib/visual/visual-model.ts` — added `SrcRange`, `StepTree`, `StructureModel`,

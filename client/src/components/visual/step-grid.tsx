@@ -6,6 +6,7 @@ import { isGridRow } from '@/lib/visual/visual-model';
 interface StepGridProps {
   model: VisualModel;
   selectedRowId: string | null;
+  activeStep?: number | null;
   onSelectRow: (id: string) => void;
   onToggleStep: (rowId: string, stepIndex: number, on: boolean) => void;
   onToggleMute: (rowId: string) => void;
@@ -21,6 +22,7 @@ function StepCell({
   color,
   muted,
   beat,
+  active,
   onPaint,
 }: {
   rowId: string;
@@ -29,13 +31,17 @@ function StepCell({
   color: string;
   muted: boolean;
   beat: boolean;
+  active: boolean;
   onPaint: (rowId: string, index: number, value?: boolean) => void;
 }) {
   return (
     <button
       type="button"
+      role="gridcell"
+      aria-pressed={on}
       data-testid={`step-cell-${rowId}-${index}`}
       data-on={on ? '1' : '0'}
+      data-active={active ? '1' : '0'}
       onMouseDown={(e) => {
         e.preventDefault();
         onPaint(rowId, index, !on);
@@ -44,8 +50,10 @@ function StepCell({
         if (e.buttons === 1) onPaint(rowId, index);
       }}
       className={`h-6 min-w-0 flex-1 rounded-[3px] border transition-colors ${
-        beat ? 'border-strudel-surface-light' : 'border-transparent'
-      } ${on ? '' : 'bg-strudel-dark hover:bg-strudel-surface-light'}`}
+        active ? 'ring-1 ring-white' : ''
+      } ${beat ? 'border-strudel-surface-light' : 'border-transparent'} ${
+        on ? '' : 'bg-strudel-dark hover:bg-strudel-surface-light'
+      }`}
       style={on ? { backgroundColor: color, opacity: muted ? 0.35 : 1 } : undefined}
       aria-label={`step ${index + 1}${on ? ' on' : ' off'}`}
     />
@@ -57,6 +65,7 @@ const MemoStepCell = memo(StepCell);
 export default function StepGrid({
   model,
   selectedRowId,
+  activeStep,
   onSelectRow,
   onToggleStep,
   onToggleMute,
@@ -90,12 +99,13 @@ export default function StepGrid({
   }
 
   return (
-    <div className="flex-1 overflow-auto px-2 py-2 space-y-1" data-testid="step-grid">
+    <div className="flex-1 overflow-auto px-2 py-2 space-y-1" data-testid="step-grid" role="grid" aria-label="Pattern step grid">
       {model.rows.map((row: VisualRow) => {
         const selected = row.id === selectedRowId;
         return (
           <div
             key={row.id}
+            role="row"
             data-testid={`visual-row-${row.id}`}
             onMouseDown={() => onSelectRow(row.id)}
             className={`flex items-center gap-1 rounded ${selected ? 'bg-strudel-surface-light/60' : 'hover:bg-strudel-surface-light/30'}`}
@@ -151,6 +161,7 @@ export default function StepGrid({
                     color={row.color}
                     muted={!!row.muted}
                     beat={i % 4 === 0}
+                    active={activeStep === i}
                     onPaint={handlePaint}
                   />
                 ))}

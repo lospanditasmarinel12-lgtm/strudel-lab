@@ -67,6 +67,7 @@ function patternToTree(p: MiniPattern): StepTree {
   const align = p.arguments_?.alignment ?? 'fastcat';
   if (align === 'fastcat') return { t: 'group', op: 'seq', children };
   if (align === 'stack') return { t: 'group', op: 'stack', children };
+  if (align === 'rand') return { t: 'group', op: 'choice', children };
   if (align === 'polymeter_slowcat') {
     // `<...>` alternation; flatten an inner sequence so cells read naturally.
     const flat: StepTree[] = [];
@@ -114,7 +115,9 @@ function elementToTree(el: MiniElement): StepTree {
 function treeFromAst(ast: MiniNode): StepTree[] {
   const tree = ast.type_ === 'atom' ? atomToTree(ast.source_) : patternToTree(ast);
   if (tree.t === 'group' && tree.op === 'seq') return tree.children;
-  if (tree.t === 'group' && tree.op === 'stack') return [{ ...tree, top: true }];
+  if (tree.t === 'group' && (tree.op === 'stack' || tree.op === 'choice')) {
+    return [{ ...tree, top: true }];
+  }
   return [tree];
 }
 

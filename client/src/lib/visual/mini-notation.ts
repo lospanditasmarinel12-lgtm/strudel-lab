@@ -169,6 +169,17 @@ export function parseMiniNotation(text: string): StepTree[] {
   const trimmed = (text ?? '').trim();
   if (trimmed === '') return [];
 
+  // Top-level random choice (`a | b | c`).
+  const choiceParts = splitTopLevel(trimmed, '|');
+  if (choiceParts.length > 1) {
+    const children: StepTree[] = choiceParts.map((part) => ({
+      t: 'group',
+      op: 'seq',
+      children: new Parser(part.trim()).parseTop(),
+    }));
+    return [{ t: 'group', op: 'choice', top: true, children }];
+  }
+
   const parts = splitTopLevel(trimmed, ',');
   if (parts.length === 1) {
     return new Parser(trimmed).parseTop();
@@ -199,6 +210,10 @@ function serializeGroup(t: Extract<StepTree, { t: 'group' }>): string {
       return `<${t.children.map(serializeTree).join(' ')}>`;
     case 'stack': {
       const inner = t.children.map(serializeStackChild).join(', ');
+      return t.top ? inner : `[${inner}]`;
+    }
+    case 'choice': {
+      const inner = t.children.map(serializeStackChild).join(' | ');
       return t.top ? inner : `[${inner}]`;
     }
     case 'fast':

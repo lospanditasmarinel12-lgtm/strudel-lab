@@ -59,6 +59,29 @@ describe('parseStructure', () => {
     ]);
   });
 
+  it('parses `sound(...)` as a drum alias', () => {
+    const node = sectionAt('$: sound("bd ~ sd")');
+    const pattern = node.pattern as GridPatternNode;
+    expect(pattern.rowKind).toBe('drum');
+    expect(pattern.factory).toBe('sound');
+    expect(serializeStructure(parseStructure('$: sound("bd ~ sd")'))).toBe('$: sound("bd ~ sd")');
+  });
+
+  it('parses `n(...)` and preserves the factory', () => {
+    const node = sectionAt('$: n("0 1 2 3").s("jazz")');
+    const pattern = node.pattern as GridPatternNode;
+    expect(pattern.rowKind).toBe('note');
+    expect(pattern.factory).toBe('n');
+    expect(pattern.sound).toBe('jazz');
+    expect(serializeStructure(parseStructure('$: n("0 1 2 3").s("jazz")'))).toBe('$: n("0 1 2 3").s("jazz")');
+  });
+
+  it('parses `.bank("…")` as an effect', () => {
+    const node = sectionAt('$: s("bd sd").bank("RolandTR909")');
+    const pattern = node.pattern as GridPatternNode;
+    expect(pattern.effects).toEqual([{ name: 'bank', value: 'RolandTR909' }]);
+  });
+
   it('parses stack/cat containers', () => {
     const node = parseStructure('stack(s("bd"), s("hh"))').nodes[0] as ContainerNode;
     expect(node.kind).toBe('container');

@@ -22,7 +22,7 @@ function Lego({ def }: { def: BlockDef }) {
   return (
     <button
       type="button"
-      data-testid={`lego-${def.id}`}
+      data-testid={`lego-${def.category}-${def.label}`}
       title={title}
       onPointerDown={(e) => {
         e.preventDefault();

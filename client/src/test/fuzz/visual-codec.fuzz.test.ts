@@ -30,6 +30,11 @@ const postStr: fc.Arbitrary<string> = fc.oneof(
 
 const seqStr: fc.Arbitrary<string> = fc.array(postStr, { maxLength: 8 }).map((xs) => xs.join(' '));
 
+// Top-level random choice (`a | b`).
+const choiceStr: fc.Arbitrary<string> = fc
+  .array(seqStr, { minLength: 2, maxLength: 3 })
+  .map((xs) => xs.join(' | '));
+
 const blockStr: fc.Arbitrary<string> = fc.oneof(
   seqStr.map((s) => `$: s(${JSON.stringify(s)})`),
   seqStr.map((s) => `$: note(${JSON.stringify(s)}).s("sine")`),
@@ -43,7 +48,7 @@ const codeArb: fc.Arbitrary<string> = fc.array(blockStr, { maxLength: 5 }).map((
 describe('fuzz: visual mini-notation', () => {
   test('serialize(parse(s)) is a fixed point', () => {
     fc.assert(
-      fc.property(seqStr, (s) => {
+      fc.property(fc.oneof(seqStr, choiceStr), (s) => {
         const once = serializeCells(parseMiniNotation(s));
         const twice = serializeCells(parseMiniNotation(once));
         expect(twice).toBe(once);

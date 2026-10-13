@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Play, Plus, Search, Upload, X, FolderOpen, Globe, Music } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Play, Plus, Search, Upload, X, Globe, Music } from "lucide-react";
 import { registerCustomSample, removeCustomSample, getCustomSamples, loadedBanks, downloadYoutubeAudio } from "@/lib/sample-registry";
-import { ALL_MODIFIERS, MODIFIERS_BY_CATEGORY, CATEGORY_LABELS } from "@/lib/modifier-registry";
+import { MODIFIERS_BY_CATEGORY, CATEGORY_LABELS } from "@/lib/modifier-registry";
 import type { CustomSample } from "@/lib/stores/db";
 import DirtSamplesBrowser from "@/components/samples/dirt-samples-browser";
 import FreesoundSearch from "@/components/samples/freesound-search";
@@ -492,7 +492,16 @@ interface SampleRowProps {
 
 function SampleRow({ name, onInsert, onPlay, onRemove, showRemove }: SampleRowProps) {
   return (
-    <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-strudel-surface-light/50 text-xs">
+    <div
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.setData('application/x-strudel-sample', name);
+        e.dataTransfer.setData('text/plain', name);
+        e.dataTransfer.effectAllowed = 'copy';
+      }}
+      title={`Drag ${name} onto a block to set its sample`}
+      className="flex items-center gap-2 px-2 py-1.5 hover:bg-strudel-surface-light/50 text-xs cursor-grab active:cursor-grabbing"
+    >
       <Music size={10} className="text-muted-foreground shrink-0" />
       <span className="flex-1 text-white font-mono truncate">{name}</span>
       <button

@@ -24,6 +24,7 @@ const AUDIO: ModifierDef[] = [
   { name: 'decay', detail: 'Envelope decay time', syntax: 'decay(0.3)', category: 'audio', controlType: 'slider', defaultMin: 0, defaultMax: 2, defaultStep: 0.01 },
   { name: 'sustain', detail: 'Envelope sustain level', syntax: 'sustain(0.8)', category: 'audio', controlType: 'slider', defaultMin: 0, defaultMax: 1, defaultStep: 0.01 },
   { name: 'release', detail: 'Envelope release time', syntax: 'release(0.5)', category: 'audio', controlType: 'slider', defaultMin: 0, defaultMax: 4, defaultStep: 0.01 },
+  { name: 'bank', detail: 'Select the sample bank', syntax: 'bank("RolandTR909")', category: 'audio', controlType: 'text' },
 ];
 
 const PATTERN: ModifierDef[] = [
