@@ -145,3 +145,79 @@ export function createDefaultVisualModel(): VisualModel {
   });
   return { stepsPerCycle, rows };
 }
+
+// ===========================================================================
+// Phase 1 — richer, round-trippable model (structure + pattern + step tree)
+// ===========================================================================
+
+/** 1-based inclusive line range, plus optional char offsets into the source. */
+export interface SrcRange {
+  startLine: number;
+  endLine: number;
+  startOffset?: number;
+  endOffset?: number;
+}
+
+interface RichNodeBase {
+  /** Stable within a single parse; derived from position. */
+  id: string;
+  /** Where this node came from in the source (for range-based patching). */
+  src?: SrcRange;
+}
+
+/**
+ * Mini-notation step tree (tiers 1–2). Anything outside these constructs makes
+ * the enclosing region a `raw` node instead.
+ */
+export type StepTree =
+  | { t: 'rest' }
+  | { t: 'token'; value: string }
+  | { t: 'group'; op: 'seq' | 'slow' | 'fast' | 'alt' | 'stack'; factor?: number; children: StepTree[] }
+  | { t: 'euclid'; fill: number; steps: number; rotate?: number; child: StepTree }
+  | { t: 'repeat'; count: number; child: StepTree }
+  | { t: 'elongate'; weight: number; child: StepTree }
+  | { t: 'prob'; value: number; child: StepTree };
+
+export type PatternNode = GridPatternNode | RawPatternNode;
+
+export interface GridPatternNode extends RichNodeBase {
+  kind: 'grid';
+  rowKind: 'drum' | 'note';
+  /** `.s("…")` sound/synth for note rows (drum rows carry the sample per step). */
+  sound?: string;
+  /** Top-level cells; length is the cycle length. A top-level `,` yields one
+   * `stack` group cell. */
+  steps: StepTree[];
+  effects: VisualEffect[];
+}
+
+export interface RawPatternNode extends RichNodeBase {
+  kind: 'raw-pattern';
+  code: string;
+}
+
+export type StructureNode = SectionNode | ContainerNode | RawNode;
+
+export interface SectionNode extends RichNodeBase {
+  kind: 'section';
+  /** `$:` label if present. */
+  label?: string;
+  pattern: PatternNode;
+  muted: boolean;
+}
+
+export interface ContainerNode extends RichNodeBase {
+  kind: 'container';
+  op: 'stack' | 'cat';
+  children: PatternNode[];
+}
+
+/** Anything the model cannot represent, preserved byte-exact. */
+export interface RawNode extends RichNodeBase {
+  kind: 'raw';
+  code: string;
+}
+
+export interface StructureModel {
+  nodes: StructureNode[];
+}

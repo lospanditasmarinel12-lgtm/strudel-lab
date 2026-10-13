@@ -1,0 +1,108 @@
+import { describe, it, expect } from 'vitest';
+import { parseStructure, serializeStructure } from './structure';
+import type { ContainerNode, GridPatternNode, SectionNode } from './visual-model';
+
+function sectionAt(code: string, i = 0): SectionNode {
+  const node = parseStructure(code).nodes[i];
+  expect(node.kind).toBe('section');
+  return node as SectionNode;
+}
+
+describe('parseStructure', () => {
+  it('parses a drum section with effects', () => {
+    const node = sectionAt('$: s("bd ~").gain(0.8)');
+    expect(node.muted).toBe(false);
+    const pattern = node.pattern as GridPatternNode;
+    expect(pattern.kind).toBe('grid');
+    expect(pattern.rowKind).toBe('drum');
+    expect(pattern.steps).toEqual([
+      { t: 'token', value: 'bd' },
+      { t: 'rest' },
+    ]);
+    expect(pattern.effects).toEqual([{ name: 'gain', value: 0.8 }]);
+  });
+
+  it('parses a note section with a sound', () => {
+    const node = sectionAt('$: note("c3 ~ e3 ~").s("sawtooth").lpf(800)');
+    const pattern = node.pattern as GridPatternNode;
+    expect(pattern.rowKind).toBe('note');
+    expect(pattern.sound).toBe('sawtooth');
+    expect(pattern.effects).toEqual([{ name: 'lpf', value: 800 }]);
+  });
+
+  it('represents multi-sample rows (new capability)', () => {
+    const node = sectionAt('$: s("bd sd")');
+    const pattern = node.pattern as GridPatternNode;
+    expect(pattern.kind).toBe('grid');
+    expect(pattern.steps).toEqual([
+      { t: 'token', value: 'bd' },
+      { t: 'token', value: 'sd' },
+    ]);
+  });
+
+  it('parses stack/cat containers', () => {
+    const node = parseStructure('stack(s("bd"), s("hh"))').nodes[0] as ContainerNode;
+    expect(node.kind).toBe('container');
+    expect(node.op).toBe('stack');
+    expect(node.children).toHaveLength(2);
+    expect((node.children[0] as GridPatternNode).steps).toEqual([{ t: 'token', value: 'bd' }]);
+  });
+
+  it('falls back to raw for unknown modifiers', () => {
+    const node = parseStructure('$: s("bd ~").madeUpThing(3)').nodes[0];
+    expect(node.kind).toBe('raw');
+    if (node.kind === 'raw') expect(node.code).toBe('$: s("bd ~").madeUpThing(3)');
+  });
+
+  it('marks muted sections', () => {
+    const node = sectionAt('// [muted] $: s("bd ~")');
+    expect(node.muted).toBe(true);
+  });
+
+  it('joins multi-line method chains', () => {
+    const node = sectionAt('note("c3 e3")\n.gain(0.3)\n.lpf(800)');
+    const pattern = node.pattern as GridPatternNode;
+    expect(pattern.effects.map((e) => e.name)).toEqual(['gain', 'lpf']);
+  });
+
+  it('splits consecutive $: blocks without blank lines', () => {
+    const model = parseStructure('$: s("bd")\n$: s("sd")');
+    expect(model.nodes).toHaveLength(2);
+  });
+
+  it('assigns stable ids and source ranges', () => {
+    const model = parseStructure('$: s("bd")\n\n$: s("sd")');
+    expect(model.nodes[0].id).toBe('node-0');
+    expect(model.nodes[1].id).toBe('node-1');
+    expect(model.nodes[1].src).toMatchObject({ startLine: 3, endLine: 3 });
+  });
+});
+
+describe('serializeStructure', () => {
+  it('round-trips simple code', () => {
+    const code = '$: s("bd ~ bd ~").gain(0.8)';
+    expect(serializeStructure(parseStructure(code))).toBe(code);
+  });
+
+  it('serializes muted sections', () => {
+    const code = '// [muted] $: s("bd ~")';
+    expect(serializeStructure(parseStructure(code))).toBe(code);
+  });
+
+  it('serializes containers in canonical multi-line form', () => {
+    const out = serializeStructure(parseStructure('stack(s("bd"), s("hh"))'));
+    expect(out).toBe('stack(\n  s("bd"),\n  s("hh")\n)');
+  });
+
+  it('preserves raw nodes verbatim', () => {
+    const code = '$: s("bd ~").madeUpThing(3)';
+    expect(serializeStructure(parseStructure(code))).toBe(code);
+  });
+
+  it('is idempotent', () => {
+    const code = '$: s("bd ~")\n\nstack(s("hh"), s("cp"))\n\n$: note("c3 e3").s("sine")';
+    const once = serializeStructure(parseStructure(code));
+    const twice = serializeStructure(parseStructure(once));
+    expect(twice).toBe(once);
+  });
+});
