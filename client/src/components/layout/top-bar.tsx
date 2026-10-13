@@ -28,6 +28,8 @@ interface TopBarProps {
   onToggleTimeline: () => void;
   showVisual: boolean;
   onToggleVisual: () => void;
+  showCanvas: boolean;
+  onToggleCanvas: () => void;
   focusMode: boolean;
   onToggleFocus: () => void;
   showSidebar: boolean;
@@ -56,6 +58,8 @@ export default memo(function TopBar({
   onToggleTimeline,
   showVisual,
   onToggleVisual,
+  showCanvas,
+  onToggleCanvas,
   focusMode,
   onToggleFocus,
   showSidebar,
@@ -118,6 +122,17 @@ export default memo(function TopBar({
           >
             <Blocks size={14} className="mr-1" />
             BLOCKS
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleCanvas}
+            data-testid="canvas-toggle"
+            className={`h-7 px-2 text-xs ${showCanvas ? 'bg-strudel-accent text-white' : 'text-muted-foreground hover:text-white'}`}
+            title="Toggle structure canvas"
+          >
+            <Layout size={14} className="mr-1" />
+            CANVAS
           </Button>
           <div className="w-px h-5 bg-strudel-surface-light" />
           <Button

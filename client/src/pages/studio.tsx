@@ -24,6 +24,9 @@ import TimelinePanel from "@/components/timeline/timeline-panel";
 import TrackControls from "@/components/timeline/track-controls";
 import BlockLayer from "@/components/blocks/block-layer";
 import BlockPalette from "@/components/blocks/block-palette";
+import StructureCanvas from "@/components/visual/structure-canvas";
+import { parse as parseStructure, serialize as serializeStructure } from "@/lib/visual/codec";
+import type { StructureModel } from "@/lib/visual/visual-model";
 import ErrorBoundary from "@/components/error-boundary";
 import type { MonacoEditorInstance } from "@/components/editor/monaco-editor";
 
@@ -48,6 +51,7 @@ export default function Studio() {
   const [consoleUpdated, setConsoleUpdated] = useState(0);
   const [showTimeline, setShowTimeline] = useState(false);
   const [showVisual, setShowVisual] = useState(false);
+  const [showCanvas, setShowCanvas] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
   const [showRightPanel, setShowRightPanel] = useState(true);
   const [showStatusBar, setShowStatusBar] = useState(true);
@@ -77,6 +81,7 @@ export default function Studio() {
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [recordingTime, setRecordingTime] = useState(0);
   const currentTracks = useMemo(() => deriveTracks(code), [code]);
+  const canvasModel = useMemo(() => parseStructure(code), [code]);
   const rafRef = useRef<number>(0);
   const recordingStartRef = useRef<number>(0);
   const [playbackTime, setPlaybackTime] = useState(0);
@@ -307,6 +312,14 @@ export default function Studio() {
     setShowVisual(s => !s);
   }, []);
 
+  const handleToggleCanvas = useCallback(() => {
+    setShowCanvas(s => !s);
+  }, []);
+
+  const handleCanvasChange = useCallback((model: StructureModel) => {
+    handleCodeChange(serializeStructure(model));
+  }, [handleCodeChange]);
+
   const handleToggleFocus = useCallback(() => {
     setFocusMode(f => !f);
   }, []);
@@ -380,6 +393,8 @@ export default function Studio() {
           onToggleTimeline={handleToggleTimeline}
           showVisual={showVisual}
           onToggleVisual={handleToggleVisual}
+          showCanvas={showCanvas}
+          onToggleCanvas={handleToggleCanvas}
           focusMode={focusMode}
           onToggleFocus={handleToggleFocus}
           showSidebar={showSidebar}
@@ -389,6 +404,12 @@ export default function Studio() {
           onToggleRightPanel={() => setShowRightPanel(s => !s)}
           onToggleStatusBar={() => setShowStatusBar(s => !s)}
         />
+      )}
+
+      {showCanvas && !focusMode && (
+        <ErrorBoundary name="StructureCanvas">
+          <StructureCanvas model={canvasModel} onChange={handleCanvasChange} />
+        </ErrorBoundary>
       )}
 
       <div className="flex-1 flex overflow-hidden">

@@ -7,12 +7,33 @@ import BlockGridPopover from './block-grid-popover';
 
 interface BlockBarProps {
   block: ParsedBlock;
+  active?: boolean;
   onDragStart: (block: ParsedBlock, x: number, y: number) => void;
   onRemove: (block: ParsedBlock) => void;
   onGridChange: (block: ParsedBlock, row: GridVisualRow) => void;
 }
 
-export default memo(function BlockBar({ block, onDragStart, onRemove, onGridChange }: BlockBarProps) {
+/** Compact inline step preview (up to 16 steps). */
+function StepPreview({ row }: { row: GridVisualRow }) {
+  const steps = row.steps.slice(0, 16);
+  return (
+    <span className="hidden sm:flex items-center gap-[1px] shrink-0" data-testid="block-step-preview">
+      {steps.map((step, i) => (
+        <span
+          key={i}
+          className="inline-block w-[5px] h-[10px] rounded-[1px]"
+          style={{
+            backgroundColor: step.on ? row.color : 'transparent',
+            border: step.on ? 'none' : '1px solid rgba(255,255,255,0.15)',
+            opacity: row.muted ? 0.4 : 1,
+          }}
+        />
+      ))}
+    </span>
+  );
+}
+
+export default memo(function BlockBar({ block, active, onDragStart, onRemove, onGridChange }: BlockBarProps) {
   const row = block.row;
   const label = row ? row.source : 'code';
 
@@ -20,7 +41,10 @@ export default memo(function BlockBar({ block, onDragStart, onRemove, onGridChan
     <div
       data-testid={`block-bar-${block.id}`}
       data-block-kind={block.kind}
-      className="flex items-center gap-1.5 h-[24px] px-1.5 rounded-sm border border-strudel-surface-light bg-strudel-surface/95 text-white select-none"
+      data-active={active ? '1' : '0'}
+      className={`flex items-center gap-1.5 h-[24px] px-1.5 rounded-sm border bg-strudel-surface/95 text-white select-none ${
+        active ? 'border-strudel-accent ring-1 ring-strudel-accent' : 'border-strudel-surface-light'
+      }`}
       style={{ borderLeft: `3px solid ${row?.color ?? '#6b7280'}` }}
     >
       <button
@@ -42,6 +66,23 @@ export default memo(function BlockBar({ block, onDragStart, onRemove, onGridChan
         {label}
       </span>
       {row && row.kind === 'note' && <span className="text-[8px] text-muted-foreground shrink-0">note</span>}
+
+      {row && <StepPreview row={row} />}
+
+      {row && row.effects.length > 0 && (
+        <span className="flex items-center gap-0.5 shrink-0">
+          {row.effects.slice(0, 3).map((e, i) => (
+            <span
+              key={`${e.name}-${i}`}
+              className="text-[8px] font-mono px-1 rounded bg-strudel-dark text-strudel-accent"
+              title={`${e.name}(${String(e.value)})`}
+            >
+              {e.name}
+            </span>
+          ))}
+          {row.effects.length > 3 && <span className="text-[8px] text-muted-foreground">+{row.effects.length - 3}</span>}
+        </span>
+      )}
 
       {row && (
         <button

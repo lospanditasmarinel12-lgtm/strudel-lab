@@ -1,6 +1,7 @@
 import { getModifierDef } from '@/lib/modifier-registry';
 import { MUTED_PREFIX } from './visual-to-code';
-import { parseMiniNotation, serializeCells, splitTopLevel } from './mini-notation';
+import { serializeCells, splitTopLevel } from './mini-notation';
+import { miniNotationToTree } from './strudel-mini-adapter';
 import type {
   ContainerNode,
   GridPatternNode,
@@ -80,7 +81,7 @@ export function formatEffect(effect: VisualEffect): string {
 
 function tryParseMini(text: string): GridPatternNode['steps'] | null {
   try {
-    return parseMiniNotation(text);
+    return miniNotationToTree(text);
   } catch {
     return null;
   }

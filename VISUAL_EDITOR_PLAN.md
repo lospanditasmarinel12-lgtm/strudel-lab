@@ -514,13 +514,27 @@ section at the end of this file.
 
 *Generated from a full review of the visual/blocks layer. Update the status line below as phases land.*
 
-**Status:** Phase 1 implemented. Phases 2–5 outstanding.
+**Status:** Phases 1–5 implemented. ✅
 
 **Plan revision (post comparison report):** substrate is **Monaco-inline fusion** — Blockly, Morphic
 (Blockly + presentation), and CodeMirror are evaluated and **rejected** (see §0.5 and
-`SCRATCH_COMPARISON_REPORT.md` Part E). The roadmap now prioritizes (2) reusing `@strudel/mini`,
-(3) a block registry with typed inputs/shadows, (4) Monaco-inline fused tiles + borrowed drag UX,
-(5) an optional canvas pane + polish.
+`SCRATCH_COMPARISON_REPORT.md` Part E).
+
+### Phases 2–5 — delivered
+- **Phase 2 (fidelity):** `strudel-mini-adapter.ts` parses mini-notation with Strudel's own parser
+  (`@strudel/web` re-export of `@strudel/mini` `mini2ast`), mapping its AST → our `StepTree`
+  (sequences, groups, `<alt>`, chords, stack, euclid, repeat, elongate, probability, `-` rests,
+  bare `?`). Falls back to the local parser. `structure.ts` now uses it. Vitest aliases
+  `@strudel/web` → its ESM bundle.
+- **Phase 3 (registry):** `client/src/lib/blocks/block-registry.ts` — typed inputs + shadow
+  defaults + drop validation; `block-palette.tsx` is registry-driven.
+- **Phase 4 (fusion):** `block-bar.tsx` is now a visual inline tile (step preview + effect chips);
+  `block-layer.tsx` adds **selection sync** (cursor ⇄ tile). Drag/reorder/drop indicator retained.
+- **Phase 5 (canvas + polish):** `structure-canvas.tsx` (reorder/mute/duplicate/remove/stack) wired
+  behind a **CANVAS** toggle in `top-bar.tsx` + `studio.tsx`; legacy `pattern-visualizer.tsx`
+  marked `@deprecated`.
+- Tests added: adapter, block-registry, structure-canvas. Result: **typecheck clean, lint 0 errors,
+  444 tests passing, build green.**
 
 ### Phase 1 — delivered
 - `client/src/lib/visual/visual-model.ts` — added `SrcRange`, `StepTree`, `StructureModel`,

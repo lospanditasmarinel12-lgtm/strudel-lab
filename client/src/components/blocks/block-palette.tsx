@@ -1,53 +1,37 @@
 import { useState } from 'react';
 import { Boxes, ChevronDown, ChevronRight } from 'lucide-react';
-import { MODIFIERS_BY_CATEGORY, type ModifierDef } from '@/lib/modifier-registry';
-import { defaultEffectValue } from '@/lib/visual/visual-model';
-import { blockDrag, type LegoPayload } from '@/lib/blocks/drag-controller';
+import { blocksByCategory, toPayload, type BlockCategory, type BlockDef } from '@/lib/blocks/block-registry';
+import { blockDrag } from '@/lib/blocks/drag-controller';
 
 interface BlockPaletteProps {
   enabled: boolean;
 }
 
-const PATTERN_LEGOS: { label: string; code: string }[] = [
-  { label: 'kick', code: '$: s("bd ~ bd ~")' },
-  { label: 'snare', code: '$: s("~ sd ~ sd")' },
-  { label: 'hats', code: '$: s("hh hh hh hh")' },
-  { label: 'bass', code: '$: note("c2 ~ c2 ~").s("sawtooth").gain(0.5)' },
-  { label: 'melody', code: '$: note("c3 e3 g3 b3").s("sawtooth").gain(0.3)' },
-];
+const CATEGORY_ORDER: BlockCategory[] = ['pattern', 'effect', 'transform', 'combinator', 'value'];
 
-const COMBINATOR_NAMES = ['stack', 'cat'];
+const CATEGORY_TITLES: Record<BlockCategory, string> = {
+  pattern: 'Patterns',
+  effect: 'Effects',
+  transform: 'Transforms',
+  combinator: 'Combinators',
+  value: 'Values',
+};
 
-function methodFor(mod: ModifierDef): string {
-  if (mod.controlType === 'none') return `.${mod.name}()`;
-  const value = defaultEffectValue(mod.name);
-  return typeof value === 'string' ? `.${mod.name}("${value}")` : `.${mod.name}(${value})`;
-}
-
-function Lego({
-  testId,
-  label,
-  payload,
-  title,
-}: {
-  testId: string;
-  label: string;
-  payload: LegoPayload;
-  title: string;
-}) {
+function Lego({ def }: { def: BlockDef }) {
+  const title = def.code ?? (def.field ? `${def.method} (default ${String(def.field.shadow)})` : def.detail ?? '');
   return (
     <button
       type="button"
-      data-testid={testId}
+      data-testid={`lego-${def.id}`}
       title={title}
       onPointerDown={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        blockDrag.start(payload, e.clientX, e.clientY);
+        blockDrag.start(toPayload(def), e.clientX, e.clientY);
       }}
       className="w-full text-left text-[10px] font-mono px-1.5 py-1 rounded border border-strudel-surface-light bg-strudel-dark text-muted-foreground hover:text-white hover:border-strudel-accent cursor-grab active:cursor-grabbing"
     >
-      {label}
+      {def.label}
     </button>
   );
 }
@@ -56,6 +40,8 @@ export default function BlockPalette({ enabled }: BlockPaletteProps) {
   const [open, setOpen] = useState(true);
 
   if (!enabled) return null;
+
+  const byCategory = blocksByCategory();
 
   return (
     <div
@@ -74,59 +60,14 @@ export default function BlockPalette({ enabled }: BlockPaletteProps) {
 
       {open && (
         <div className="max-h-[45vh] overflow-auto p-1.5 space-y-2">
-          <div className="space-y-1">
-            <div className="text-[8px] uppercase text-muted-foreground px-0.5">Patterns</div>
-            {PATTERN_LEGOS.map((p) => (
-              <Lego
-                key={p.label}
-                testId={`lego-pattern-${p.label}`}
-                label={p.label}
-                title={p.code}
-                payload={{ kind: 'pattern', label: p.label, code: p.code }}
-              />
-            ))}
-          </div>
-
-          <div className="space-y-1">
-            <div className="text-[8px] uppercase text-muted-foreground px-0.5">Effects</div>
-            {MODIFIERS_BY_CATEGORY.audio.map((mod) => (
-              <Lego
-                key={mod.name}
-                testId={`lego-effect-${mod.name}`}
-                label={mod.name}
-                title={mod.detail}
-                payload={{ kind: 'method', label: mod.name, method: methodFor(mod) }}
-              />
-            ))}
-          </div>
-
-          <div className="space-y-1">
-            <div className="text-[8px] uppercase text-muted-foreground px-0.5">Transforms</div>
-            {MODIFIERS_BY_CATEGORY.pattern.map((mod) => (
-              <Lego
-                key={mod.name}
-                testId={`lego-transform-${mod.name}`}
-                label={mod.name}
-                title={mod.detail}
-                payload={{ kind: 'method', label: mod.name, method: methodFor(mod) }}
-              />
-            ))}
-          </div>
-
-          <div className="space-y-1">
-            <div className="text-[8px] uppercase text-muted-foreground px-0.5">Combinators</div>
-            {MODIFIERS_BY_CATEGORY.combinator
-              .filter((mod) => COMBINATOR_NAMES.includes(mod.name))
-              .map((mod) => (
-                <Lego
-                  key={mod.name}
-                  testId={`lego-combinator-${mod.name}`}
-                  label={mod.name}
-                  title={mod.detail}
-                  payload={{ kind: 'combinator', label: mod.name, wrapper: mod.name as 'stack' | 'cat' }}
-                />
+          {CATEGORY_ORDER.map((category) => (
+            <div key={category} className="space-y-1">
+              <div className="text-[8px] uppercase text-muted-foreground px-0.5">{CATEGORY_TITLES[category]}</div>
+              {byCategory[category].map((def) => (
+                <Lego key={def.id} def={def} />
               ))}
-          </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

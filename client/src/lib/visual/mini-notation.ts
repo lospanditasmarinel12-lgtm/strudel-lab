@@ -78,6 +78,7 @@ class Parser {
     }
     const value = this.s.slice(start, this.i);
     if (value === '') throw new MiniNotationError(`expected token at ${start}`);
+    if (value === '-' || value === '~') return { t: 'rest' };
     return { t: 'token', value };
   }
 
@@ -99,7 +100,9 @@ class Parser {
         node = { t: 'elongate', weight: this.readNumber(), child: node };
       } else if (c === '?') {
         this.i++;
-        node = { t: 'prob', value: this.readNumber(), child: node };
+        // Bare `?` defaults to 0.5 probability.
+        const value = /[0-9.]/.test(this.peek()) ? this.readNumber() : 0.5;
+        node = { t: 'prob', value, child: node };
       } else if (c === '(') {
         this.i++;
         const fill = this.readNumber();
@@ -175,7 +178,7 @@ export function parseMiniNotation(text: string): StepTree[] {
     const cells = new Parser(part.trim()).parseTop();
     return { t: 'group', op: 'seq', children: cells } as StepTree;
   });
-  return [{ t: 'group', op: 'stack', children }];
+  return [{ t: 'group', op: 'stack', top: true, children }];
 }
 
 function fmt(n: number | undefined): string {
@@ -194,8 +197,10 @@ function serializeGroup(t: Extract<StepTree, { t: 'group' }>): string {
       return `[${t.children.map(serializeTree).join(' ')}]`;
     case 'alt':
       return `<${t.children.map(serializeTree).join(' ')}>`;
-    case 'stack':
-      return t.children.map(serializeStackChild).join(', ');
+    case 'stack': {
+      const inner = t.children.map(serializeStackChild).join(', ');
+      return t.top ? inner : `[${inner}]`;
+    }
     case 'fast':
       return `${serializeTree(t.children[0])}*${fmt(t.factor)}`;
     case 'slow':

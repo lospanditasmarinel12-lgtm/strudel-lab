@@ -172,7 +172,14 @@ interface RichNodeBase {
 export type StepTree =
   | { t: 'rest' }
   | { t: 'token'; value: string }
-  | { t: 'group'; op: 'seq' | 'slow' | 'fast' | 'alt' | 'stack'; factor?: number; children: StepTree[] }
+  | {
+      t: 'group';
+      op: 'seq' | 'slow' | 'fast' | 'alt' | 'stack';
+      factor?: number;
+      children: StepTree[];
+      /** For `stack`: true when it is the row-level stack (no surrounding brackets). */
+      top?: boolean;
+    }
   | { t: 'euclid'; fill: number; steps: number; rotate?: number; child: StepTree }
   | { t: 'repeat'; count: number; child: StepTree }
   | { t: 'elongate'; weight: number; child: StepTree }

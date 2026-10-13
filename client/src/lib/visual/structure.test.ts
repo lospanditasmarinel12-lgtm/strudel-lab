@@ -40,6 +40,25 @@ describe('parseStructure', () => {
     ]);
   });
 
+  it('represents a chord as a stack cell (authoritative parser)', () => {
+    const node = sectionAt('$: note("c3 [e3,g3]").s("sine")');
+    const pattern = node.pattern as GridPatternNode;
+    expect(pattern.kind).toBe('grid');
+    const chord = pattern.steps[1];
+    expect(chord.t).toBe('group');
+    if (chord.t === 'group') expect(chord.op).toBe('stack');
+  });
+
+  it('represents a `-` rest alias', () => {
+    const node = sectionAt('$: s("bd - sd")');
+    const pattern = node.pattern as GridPatternNode;
+    expect(pattern.steps).toEqual([
+      { t: 'token', value: 'bd' },
+      { t: 'rest' },
+      { t: 'token', value: 'sd' },
+    ]);
+  });
+
   it('parses stack/cat containers', () => {
     const node = parseStructure('stack(s("bd"), s("hh"))').nodes[0] as ContainerNode;
     expect(node.kind).toBe('container');

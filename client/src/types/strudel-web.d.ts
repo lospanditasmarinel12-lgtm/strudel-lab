@@ -13,6 +13,15 @@ declare module '@strudel/web' {
   export function note(pattern: string): any;
   export function getTime(): number;
   export function getPattern(): any;
+  // Mini-notation parser (authoritative; re-exported from @strudel/mini).
+  export function mini2ast(code: string): any;
+  export function mini(...args: string[]): any;
+  export function parse(code: string): any;
+  export function patternifyAST(...args: any[]): any;
+  export function getLeaves(...args: any[]): any[];
+  export function getLeafLocations(...args: any[]): any[];
+  export function miniAllStrings(...args: any[]): any;
+  export function minify(...args: any[]): any;
   export class Pattern {
     prototype: any;
     static prototype: any;

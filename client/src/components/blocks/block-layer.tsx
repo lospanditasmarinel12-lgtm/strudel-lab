@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import * as monaco from 'monaco-editor';
 import type { MonacoEditorInstance } from '@/components/editor/monaco-editor';
-import { parseBlocks, barBlocks, type ParsedBlock } from '@/lib/blocks/parse-blocks';
+import { parseBlocks, barBlocks, findBlockAtLine, type ParsedBlock } from '@/lib/blocks/parse-blocks';
 import {
   applyDrop,
   blockDrag,
@@ -39,6 +39,17 @@ export default function BlockLayer({ editor, code, enabled }: BlockLayerProps) {
   const dropLineRef = useRef<number | null>(null);
   const codeRef = useRef(code);
   codeRef.current = code;
+  const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
+
+  // Selection sync: highlight the block whose line range contains the cursor.
+  useEffect(() => {
+    if (!editor) return;
+    const sub = editor.onDidChangeCursorPosition((e) => {
+      const block = findBlockAtLine(blocksRef.current, e.position.lineNumber);
+      setActiveBlockId(block?.id ?? null);
+    });
+    return () => sub.dispose();
+  }, [editor]);
 
   const clearIndicator = useCallback(() => {
     decorationsRef.current?.clear();
@@ -214,6 +225,7 @@ export default function BlockLayer({ editor, code, enabled }: BlockLayerProps) {
         return createPortal(
           <BlockBar
             block={block}
+            active={block.id === activeBlockId}
             onDragStart={handleDragStart}
             onRemove={handleRemove}
             onGridChange={handleGridChange}

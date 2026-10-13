@@ -1,3 +1,9 @@
+/**
+ * @deprecated Superseded by the shared visual model
+ * (`client/src/lib/visual/*`) and the inline `StepGrid`/`BlockLayer`. This
+ * legacy visualizer uses its own regex parser and a fake step timer; it is kept
+ * only for reference and will be removed. Do not use in new code.
+ */
 import { useEffect, useState } from "react";
 
 interface PatternVisualizerProps {

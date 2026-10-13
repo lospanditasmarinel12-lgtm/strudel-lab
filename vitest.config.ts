@@ -30,6 +30,8 @@ export default defineConfig({
     alias: {
       '@': path.resolve(import.meta.dirname, './client/src'),
       '@shared': path.resolve(import.meta.dirname, './shared'),
+      // Force the ESM bundle (the `main` field points at a UMD build with no exports).
+      '@strudel/web': path.resolve(import.meta.dirname, './node_modules/@strudel/web/dist/index.mjs'),
     },
   },
   optimizeDeps: {
