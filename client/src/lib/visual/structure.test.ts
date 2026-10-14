@@ -90,10 +90,35 @@ describe('parseStructure', () => {
     expect((node.children[0] as GridPatternNode).steps).toEqual([{ t: 'token', value: 'bd' }]);
   });
 
-  it('falls back to raw for unknown modifiers', () => {
-    const node = parseStructure('$: s("bd ~").madeUpThing(3)').nodes[0];
-    expect(node.kind).toBe('raw');
-    if (node.kind === 'raw') expect(node.code).toBe('$: s("bd ~").madeUpThing(3)');
+  it('preserves unknown modifiers as raw effects (keeps the block editable)', () => {
+    const node = sectionAt('$: s("bd ~").madeUpThing(3)');
+    const pattern = node.pattern as GridPatternNode;
+    expect(pattern.kind).toBe('grid');
+    expect(pattern.effects).toEqual([{ name: 'madeUpThing', value: 3 }]);
+    expect(serializeStructure(parseStructure('$: s("bd ~").madeUpThing(3)'))).toBe('$: s("bd ~").madeUpThing(3)');
+  });
+
+  it('preserves function-valued args verbatim (`.jux(rev)`)', () => {
+    const node = sectionAt('$: s("bd sd").jux(rev)');
+    const pattern = node.pattern as GridPatternNode;
+    expect(pattern.effects).toEqual([{ name: 'jux', value: 'rev', raw: true }]);
+    expect(serializeStructure(parseStructure('$: s("bd sd").jux(rev)'))).toBe('$: s("bd sd").jux(rev)');
+  });
+
+  it('preserves multi-arg / arrow-fn args verbatim (`.off(...)`)', () => {
+    const code = '$: note("c3 e3").s("sine").off(1/16, x=>x.add(4))';
+    const node = sectionAt(code);
+    const pattern = node.pattern as GridPatternNode;
+    expect(pattern.effects[0]).toMatchObject({ name: 'off', raw: true });
+    expect(serializeStructure(parseStructure(code))).toBe(code);
+  });
+
+  it('preserves signal args verbatim (`.speed(perlin.range(0,1))`)', () => {
+    const code = '$: s("bd").speed(perlin.range(0,1))';
+    const node = sectionAt(code);
+    const pattern = node.pattern as GridPatternNode;
+    expect(pattern.effects[0]).toMatchObject({ name: 'speed', raw: true });
+    expect(serializeStructure(parseStructure(code))).toBe(code);
   });
 
   it('marks muted sections', () => {

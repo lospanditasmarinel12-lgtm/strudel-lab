@@ -1,20 +1,23 @@
 import { ArrowDown, ArrowUp, Copy, Eye, EyeOff, Layers, Trash2 } from 'lucide-react';
 import { duplicateNode, moveNode, removeNode, setMuted, wrapInContainer } from '@/lib/visual/edit-ops';
-import { pickRowColor, type StructureModel, type StructureNode } from '@/lib/visual/visual-model';
+import { pickRowColor, type PatternNode, type StructureModel, type StructureNode } from '@/lib/visual/visual-model';
 
 interface StructureCanvasProps {
   model: StructureModel;
   onChange: (next: StructureModel) => void;
 }
 
-function nodeLabel(node: StructureNode): string {
-  if (node.kind === 'container') return `${node.op}(${node.children.length})`;
-  if (node.kind === 'raw') return node.code.split('\n')[0]?.slice(0, 32) || 'code';
-  const p = node.pattern;
-  if (p.kind === 'raw-pattern') return p.code.split('\n')[0]?.slice(0, 32) || 'code';
+function patternLabel(p: PatternNode): string {
+  if (p.kind === 'raw-pattern') return p.code.split('\n')[0]?.slice(0, 24) || 'code';
   const first = p.steps.find((s) => s.t === 'token');
   const sample = first && first.t === 'token' ? first.value : p.sound ?? p.rowKind;
   return `${p.rowKind === 'note' ? '♪' : '▦'} ${sample}`;
+}
+
+function nodeLabel(node: StructureNode): string {
+  if (node.kind === 'container') return `${node.op}(${node.children.length})`;
+  if (node.kind === 'raw') return node.code.split('\n')[0]?.slice(0, 32) || 'code';
+  return patternLabel(node.pattern);
 }
 
 function nodeColor(node: StructureNode, index: number): string {
@@ -49,6 +52,20 @@ export default function StructureCanvas({ model, onChange }: StructureCanvasProp
                 {nodeLabel(node)}
               </span>
             </div>
+
+            {node.kind === 'container' && node.children.length > 0 && (
+              <div className="flex flex-wrap gap-1 pl-1 border-l border-strudel-surface-light">
+                {node.children.map((child, i) => (
+                  <span
+                    key={`${child.id}-${i}`}
+                    data-testid={`canvas-child-${node.id}-${i}`}
+                    className="text-[9px] font-mono text-muted-foreground bg-strudel-surface rounded px-1 py-0.5"
+                  >
+                    {patternLabel(child)}
+                  </span>
+                ))}
+              </div>
+            )}
 
             <div className="flex items-center gap-1 text-muted-foreground">
               <button
@@ -112,14 +129,24 @@ export default function StructureCanvas({ model, onChange }: StructureCanvasProp
       })}
 
       {canWrap && (
-        <button
-          type="button"
-          data-testid="canvas-wrap-stack"
-          onClick={() => onChange(wrapInContainer(model, model.nodes.map((n) => n.id), 'stack'))}
-          className="self-center text-[10px] px-2 py-1 rounded border border-strudel-surface-light text-muted-foreground hover:text-white"
-        >
-          stack all
-        </button>
+        <div className="self-center flex flex-col gap-1">
+          <button
+            type="button"
+            data-testid="canvas-wrap-stack"
+            onClick={() => onChange(wrapInContainer(model, model.nodes.map((n) => n.id), 'stack'))}
+            className="text-[10px] px-2 py-1 rounded border border-strudel-surface-light text-muted-foreground hover:text-white"
+          >
+            stack all
+          </button>
+          <button
+            type="button"
+            data-testid="canvas-wrap-cat"
+            onClick={() => onChange(wrapInContainer(model, model.nodes.map((n) => n.id), 'cat'))}
+            className="text-[10px] px-2 py-1 rounded border border-strudel-surface-light text-muted-foreground hover:text-white"
+          >
+            cat all
+          </button>
+        </div>
       )}
     </div>
   );

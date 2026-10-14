@@ -550,7 +550,18 @@ section at the end of this file.
 - **JS-layer (bounded):** preserve factory names (`s`/`sound`/`note`/`n`/`chord`); add `bank`
   modifier. Function-valued args (`.jux(rev)`, `.off(...)`) still fall back to `raw`.
 
-Result: **typecheck clean, lint 0 errors, 451 tests passing, build green.**
+### Second follow-up (this pass)
+- **JS-layer method-chain tokenizer:** `parseEffects` now scans balanced parens (quote-aware) and
+  preserves any argument verbatim as a `raw` effect — so `.jux(rev)`, `.off(1/16, x=>x.add(4))`,
+  `.speed(perlin.range(0,1))`, and unknown methods keep the block **editable** instead of `raw`.
+  `VisualEffect` gained `raw?: boolean`; `row-inspector` edits raw effects as text.
+- **Tier-2 sub-editor (`sub-pattern-editor.tsx`):** edits top-level `StepTree` cells over the rich
+  model — simple cells toggle, complex cells (chords/groups/euclid/…) open a mini-notation cell
+  editor. Wired into the block bar's `grid+` popover via `onAdvancedChange`.
+- **Canvas nesting:** container nodes render their children inline; added `cat all` alongside
+  `stack all`.
+
+Result: **typecheck clean, lint 0 errors, 460 tests passing, build green.**
 
 ### Phase 1 — delivered
 - `client/src/lib/visual/visual-model.ts` — added `SrcRange`, `StepTree`, `StructureModel`,

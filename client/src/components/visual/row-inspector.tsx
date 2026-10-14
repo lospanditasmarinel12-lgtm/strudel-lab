@@ -91,7 +91,15 @@ export default function RowInspector({
           return (
             <div key={`${effect.name}-${i}`} className="flex items-center gap-1.5">
               <span className="text-[9px] text-muted-foreground w-12 shrink-0 font-mono">{effect.name}</span>
-              {def?.controlType === 'slider' && (
+              {effect.raw && (
+                <input
+                  value={typeof effect.value === 'string' ? effect.value : String(effect.value)}
+                  onChange={(e) => onUpdateEffect(row.id, i, e.target.value)}
+                  className="flex-1 bg-strudel-dark border border-strudel-surface-light rounded text-[10px] text-strudel-accent font-mono px-1 py-0.5"
+                  title="Raw expression (e.g. rev, perlin.range(0,1), 1/16, x=>x.add(4))"
+                />
+              )}
+              {!effect.raw && def?.controlType === 'slider' && (
                 <>
                   <input
                     type="range"
@@ -107,14 +115,16 @@ export default function RowInspector({
                   </span>
                 </>
               )}
-              {def?.controlType === 'text' && (
+              {!effect.raw && def?.controlType === 'text' && (
                 <input
                   value={typeof effect.value === 'string' ? effect.value : ''}
                   onChange={(e) => onUpdateEffect(row.id, i, e.target.value)}
                   className="flex-1 bg-strudel-dark border border-strudel-surface-light rounded text-[10px] text-white px-1 py-0.5"
                 />
               )}
-              {def?.controlType === 'none' && <span className="flex-1 text-[9px] text-muted-foreground">on</span>}
+              {!effect.raw && def?.controlType === 'none' && (
+                <span className="flex-1 text-[9px] text-muted-foreground">on</span>
+              )}
               <button
                 type="button"
                 onClick={() => onRemoveEffect(row.id, i)}

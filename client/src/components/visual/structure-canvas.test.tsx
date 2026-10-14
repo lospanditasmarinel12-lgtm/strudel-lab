@@ -50,4 +50,22 @@ describe('StructureCanvas', () => {
     const next = onChange.mock.calls[0][0];
     expect(serialize(next).startsWith('stack(')).toBe(true);
   });
+
+  it('wraps all nodes in a cat', () => {
+    const model = parse(CODE);
+    const onChange = vi.fn();
+    render(<StructureCanvas model={model} onChange={onChange} />);
+    fireEvent.click(screen.getByTestId('canvas-wrap-cat'));
+    const next = onChange.mock.calls[0][0];
+    expect(serialize(next).startsWith('cat(')).toBe(true);
+  });
+
+  it('renders nested container children', () => {
+    const model = parse('stack(s("bd"), s("hh"))');
+    render(<StructureCanvas model={model} onChange={() => {}} />);
+    const container = model.nodes[0];
+    expect(container.kind).toBe('container');
+    expect(screen.getByTestId(`canvas-child-${container.id}-0`)).toBeTruthy();
+    expect(screen.getByTestId(`canvas-child-${container.id}-1`)).toBeTruthy();
+  });
 });

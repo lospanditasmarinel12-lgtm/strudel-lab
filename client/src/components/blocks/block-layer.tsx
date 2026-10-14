@@ -13,7 +13,8 @@ import {
   type DragEventInfo,
 } from '@/lib/blocks/drag-controller';
 import { visualRowToCode } from '@/lib/visual/visual-to-code';
-import type { GridVisualRow } from '@/lib/visual/visual-model';
+import { parseStructure, serializeNode } from '@/lib/visual/structure';
+import type { GridPatternNode, GridVisualRow } from '@/lib/visual/visual-model';
 import BlockBar from './block-bar';
 
 interface BlockLayerProps {
@@ -216,6 +217,17 @@ export default function BlockLayer({ editor, code, enabled }: BlockLayerProps) {
     [applyCode],
   );
 
+  const handleAdvancedChange = useCallback(
+    (block: ParsedBlock, pattern: GridPatternNode) => {
+      const node = parseStructure(block.code).nodes[0];
+      if (node && node.kind === 'section') {
+        node.pattern = pattern;
+        applyCode(replaceBlock(codeRef.current, block.startLine, block.endLine, serializeNode(node)));
+      }
+    },
+    [applyCode],
+  );
+
   const handleDropSample = useCallback(
     (block: ParsedBlock, sample: string) => {
       const row = block.row;
@@ -251,6 +263,7 @@ export default function BlockLayer({ editor, code, enabled }: BlockLayerProps) {
             onDuplicate={handleDuplicate}
             onDropSample={handleDropSample}
             onGridChange={handleGridChange}
+            onAdvancedChange={handleAdvancedChange}
           />,
           dom,
           block.id,

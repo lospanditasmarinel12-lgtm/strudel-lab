@@ -1,4 +1,3 @@
-import { getModifierDef } from '@/lib/modifier-registry';
 import { MUTED_PREFIX } from './visual-to-code';
 import { serializeCells, splitTopLevel } from './mini-notation';
 import { miniNotationToTree } from './strudel-mini-adapter';
@@ -42,34 +41,75 @@ export function normalizeCode(code: string): string {
 // Effects
 // ---------------------------------------------------------------------------
 
+/**
+ * Parse a trailing method chain (`.a(1).b("x").c(rev)`) into effects.
+ *
+ * Known modifiers with a number/string argument become typed effects; anything
+ * else (function refs, signals, arrow fns, pattern strings, unknown methods) is
+ * preserved verbatim as a `raw` effect so the whole block stays editable.
+ * Returns `null` only for a malformed chain.
+ */
 export function parseEffects(rest: string): VisualEffect[] | null {
-  if (!rest) return [];
+  if (!rest.trim()) return [];
   const effects: VisualEffect[] = [];
-  const re = /\.([A-Za-z_][A-Za-z0-9_]*)\(\s*([^()]*?)\s*\)/g;
-  let consumed = 0;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(rest)) !== null) {
-    if (m.index !== consumed) return null;
-    consumed = m.index + m[0].length;
-    const name = m[1];
-    if (!getModifierDef(name)) return null;
-    const raw = m[2];
-    let value: number | string;
-    if (raw === '') value = '';
-    else if (NUMBER_RE.test(raw)) value = Number(raw);
-    else {
-      const str = raw.match(/^["'](.*)["']$/);
-      if (!str) return null;
-      value = str[1];
+  let i = 0;
+  const n = rest.length;
+
+  while (i < n) {
+    while (i < n && /\s/.test(rest[i])) i++;
+    if (i >= n) break;
+    if (rest[i] !== '.') return null;
+    i++;
+
+    const nameStart = i;
+    while (i < n && /[A-Za-z0-9_]/.test(rest[i])) i++;
+    const name = rest.slice(nameStart, i);
+    if (!name) return null;
+
+    while (i < n && /\s/.test(rest[i])) i++;
+    if (rest[i] !== '(') return null;
+    i++;
+
+    // Read balanced parentheses, respecting string literals.
+    const argStart = i;
+    let depth = 1;
+    let quote: string | null = null;
+    while (i < n && depth > 0) {
+      const ch = rest[i];
+      if (quote) {
+        if (ch === quote && rest[i - 1] !== '\\') quote = null;
+      } else if (ch === '"' || ch === "'") {
+        quote = ch;
+      } else if (ch === '(') {
+        depth++;
+      } else if (ch === ')') {
+        depth--;
+        if (depth === 0) break;
+      }
+      i++;
     }
-    effects.push({ name, value });
+    if (depth !== 0) return null;
+    const arg = rest.slice(argStart, i).trim();
+    i++; // consume ')'
+
+    effects.push(parseEffectArg(name, arg));
   }
-  if (consumed !== rest.length) return null;
+
   return effects;
 }
 
+function parseEffectArg(name: string, arg: string): VisualEffect {
+  if (arg === '') return { name, value: '' };
+  if (NUMBER_RE.test(arg)) return { name, value: Number(arg) };
+  const str = arg.match(/^(["'])([\s\S]*)\1$/);
+  if (str) return { name, value: str[2] };
+  // Unknown/structured argument: keep it verbatim.
+  return { name, value: arg, raw: true };
+}
+
 export function formatEffect(effect: VisualEffect): string {
-  const { name, value } = effect;
+  const { name, value, raw } = effect;
+  if (raw) return `.${name}(${value})`;
   if (value === '' || value === undefined || value === null) return `.${name}()`;
   if (typeof value === 'number') return `.${name}(${value})`;
   return `.${name}(${JSON.stringify(String(value))})`;

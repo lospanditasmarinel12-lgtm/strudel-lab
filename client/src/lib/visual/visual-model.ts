@@ -14,6 +14,8 @@ export interface VisualStep {
 export interface VisualEffect {
   name: string;
   value: number | string;
+  /** True when `value` is a raw expression (function ref, signal, arrow fn) — emitted verbatim. */
+  raw?: boolean;
 }
 
 interface VisualRowBase {

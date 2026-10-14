@@ -11,6 +11,10 @@ const SAMPLES = [
   '// [muted] $: s("bd ~")',
   '$: s("bd")\n\n$: s("sd")',
   '$: note("c3 e3")\n.gain(0.3)',
+  '$: s("bd sd").jux(rev)',
+  '$: note("c3 e3").off(1/16, x=>x.add(4))',
+  '$: s("bd").speed(perlin.range(0,1))',
+  '$: n("0 1 2").scale("C:minor").sound("jazz")',
 ];
 
 describe('codec', () => {
