@@ -1,5 +1,12 @@
-import { ArrowDown, ArrowUp, Copy, Eye, EyeOff, Layers, Trash2 } from 'lucide-react';
-import { duplicateNode, moveNode, removeNode, setMuted, wrapInContainer } from '@/lib/visual/edit-ops';
+import { ArrowDown, ArrowUp, Copy, Eye, EyeOff, Layers, Trash2, X } from 'lucide-react';
+import {
+  duplicateNode,
+  moveNode,
+  removeContainerChild,
+  removeNode,
+  setMuted,
+  wrapInContainer,
+} from '@/lib/visual/edit-ops';
 import { pickRowColor, type PatternNode, type StructureModel, type StructureNode } from '@/lib/visual/visual-model';
 
 interface StructureCanvasProps {
@@ -59,9 +66,18 @@ export default function StructureCanvas({ model, onChange }: StructureCanvasProp
                   <span
                     key={`${child.id}-${i}`}
                     data-testid={`canvas-child-${node.id}-${i}`}
-                    className="text-[9px] font-mono text-muted-foreground bg-strudel-surface rounded px-1 py-0.5"
+                    className="flex items-center gap-0.5 text-[9px] font-mono text-muted-foreground bg-strudel-surface rounded px-1 py-0.5"
                   >
                     {patternLabel(child)}
+                    <button
+                      type="button"
+                      data-testid={`canvas-child-remove-${node.id}-${i}`}
+                      aria-label={`Remove child ${i + 1}`}
+                      onClick={() => onChange(removeContainerChild(model, node.id, i))}
+                      className="text-muted-foreground hover:text-red-400"
+                    >
+                      <X size={9} />
+                    </button>
                   </span>
                 ))}
               </div>

@@ -3,8 +3,11 @@ import { parse, serialize } from './codec';
 import {
   addEffect,
   addNode,
+  duplicateContainerChild,
   duplicateNode,
+  moveContainerChild,
   moveNode,
+  removeContainerChild,
   removeEffect,
   removeNode,
   setCell,
@@ -70,6 +73,21 @@ describe('edit-ops', () => {
     expect(out.nodes).toHaveLength(1);
     expect(out.nodes[0].kind).toBe('container');
     expect(serialize(out)).toBe('stack(\n  s("bd ~"),\n  s("~ sd")\n)');
+  });
+
+  it('edits container children (remove / move / duplicate)', () => {
+    const model = parse('stack(s("bd"), s("hh"), s("cp"))');
+    const cid = model.nodes[0].id;
+
+    const removed = removeContainerChild(model, cid, 1);
+    expect(serialize(removed)).toBe('stack(\n  s("bd"),\n  s("cp")\n)');
+
+    const moved = moveContainerChild(model, cid, 0, 2);
+    expect(serialize(moved)).toBe('stack(\n  s("hh"),\n  s("cp"),\n  s("bd")\n)');
+
+    const dup = duplicateContainerChild(model, cid, 0);
+    const container = dup.nodes[0];
+    if (container.kind === 'container') expect(container.children).toHaveLength(4);
   });
 
   it('setCell updates one step', () => {

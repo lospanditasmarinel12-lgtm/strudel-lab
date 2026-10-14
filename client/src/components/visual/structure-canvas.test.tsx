@@ -60,6 +60,16 @@ describe('StructureCanvas', () => {
     expect(serialize(next).startsWith('cat(')).toBe(true);
   });
 
+  it('removes a nested container child', () => {
+    const model = parse('stack(s("bd"), s("hh"))');
+    const onChange = vi.fn();
+    render(<StructureCanvas model={model} onChange={onChange} />);
+    const container = model.nodes[0];
+    fireEvent.click(screen.getByTestId(`canvas-child-remove-${container.id}-0`));
+    const next = onChange.mock.calls[0][0];
+    expect(serialize(next)).toBe('stack(\n  s("hh")\n)');
+  });
+
   it('renders nested container children', () => {
     const model = parse('stack(s("bd"), s("hh"))');
     render(<StructureCanvas model={model} onChange={() => {}} />);

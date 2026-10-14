@@ -108,6 +108,59 @@ export function wrapInContainer(model: StructureModel, ids: string[], op: 'stack
 }
 
 // ---------------------------------------------------------------------------
+// Container child edits
+// ---------------------------------------------------------------------------
+
+function updateContainer(
+  model: StructureModel,
+  containerId: string,
+  update: (c: ContainerNode) => ContainerNode,
+): StructureModel {
+  let changed = false;
+  const nodes = model.nodes.map((n) => {
+    if (n.kind === 'container' && n.id === containerId) {
+      changed = true;
+      return update(n);
+    }
+    return n;
+  });
+  return changed ? { nodes } : model;
+}
+
+export function removeContainerChild(model: StructureModel, containerId: string, index: number): StructureModel {
+  return updateContainer(model, containerId, (c) => ({
+    ...c,
+    children: c.children.filter((_, i) => i !== index),
+  }));
+}
+
+export function moveContainerChild(
+  model: StructureModel,
+  containerId: string,
+  index: number,
+  toIndex: number,
+): StructureModel {
+  return updateContainer(model, containerId, (c) => {
+    const children = [...c.children];
+    if (index < 0 || index >= children.length) return c;
+    const [moved] = children.splice(index, 1);
+    children.splice(Math.max(0, Math.min(children.length, toIndex)), 0, moved);
+    return { ...c, children };
+  });
+}
+
+export function duplicateContainerChild(model: StructureModel, containerId: string, index: number): StructureModel {
+  return updateContainer(model, containerId, (c) => {
+    if (index < 0 || index >= c.children.length) return c;
+    const copy = clonePattern(c.children[index]);
+    copy.id = nanoid(8);
+    const children = [...c.children];
+    children.splice(index + 1, 0, copy);
+    return { ...c, children };
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Grid (pattern) edits
 // ---------------------------------------------------------------------------
 
