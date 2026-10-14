@@ -1,5 +1,10 @@
+import { secureClear, secureGet, secureSet } from './secure-store';
+
 const API_BASE = 'https://freesound.org/apiv2';
 const STORAGE_KEY = 'freesound_api_key';
+
+// In-memory cache so requests don't hit the (possibly IPC-backed) store each time.
+let cachedKey: string | null | undefined;
 
 export interface FreesoundSound {
   id: number;
@@ -33,25 +38,36 @@ export class FreesoundApiError extends Error {
   }
 }
 
-export function getApiKey(): string | null {
-  return localStorage.getItem(STORAGE_KEY);
+export async function getApiKey(): Promise<string | null> {
+  if (cachedKey !== undefined) return cachedKey;
+  cachedKey = await secureGet(STORAGE_KEY);
+  return cachedKey;
 }
 
-export function setApiKey(key: string): void {
-  localStorage.setItem(STORAGE_KEY, key);
+export async function setApiKey(key: string): Promise<void> {
+  cachedKey = key;
+  await secureSet(STORAGE_KEY, key);
 }
 
-export function clearApiKey(): void {
-  localStorage.removeItem(STORAGE_KEY);
+export async function clearApiKey(): Promise<void> {
+  cachedKey = null;
+  await secureClear(STORAGE_KEY);
 }
 
-export function hasApiKey(): boolean {
-  return !!localStorage.getItem(STORAGE_KEY);
+export async function hasApiKey(): Promise<boolean> {
+  return (await getApiKey()) !== null;
+}
+
+/** Authenticate via the `Authorization` header (keeps the key out of URLs). */
+function authHeaders(key: string): Record<string, string> {
+  return { Authorization: `Token ${key}` };
 }
 
 export async function validateApiKey(key: string): Promise<boolean> {
   try {
-    const res = await fetch(`${API_BASE}/search/?query=test&page_size=1&token=${key}`);
+    const res = await fetch(`${API_BASE}/search/?query=test&page_size=1`, {
+      headers: authHeaders(key),
+    });
     return res.ok;
   } catch {
     return false;
@@ -63,7 +79,7 @@ async function freesoundFetch(
   params?: Record<string, string>,
   signal?: AbortSignal
 ): Promise<any> {
-  const apiKey = getApiKey();
+  const apiKey = await getApiKey();
   if (!apiKey) throw new FreesoundApiError('Freesound API key not set', 'NO_KEY');
 
   const url = new URL(`${API_BASE}${path}`);
@@ -72,11 +88,10 @@ async function freesoundFetch(
       url.searchParams.set(k, v);
     }
   }
-  url.searchParams.set('token', apiKey);
 
   let res: Response;
   try {
-    res = await fetch(url.toString(), { signal });
+    res = await fetch(url.toString(), { signal, headers: authHeaders(apiKey) });
   } catch (err: any) {
     if (err.name === 'AbortError') throw err;
     throw new FreesoundApiError(`Network error: ${err instanceof Error ? err.message : String(err)}`, 'NETWORK');

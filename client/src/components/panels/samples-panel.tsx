@@ -63,6 +63,7 @@ export default function SamplesPanel({ onInsertSample, onPlaySample, refreshKey,
   const [dragOver, setDragOver] = useState(false);
   const [originTab, setOriginTab] = useState<'builtin' | 'dirt' | 'freesound' | 'custom' | 'modifiers'>('builtin');
   const [apiKeyDialogOpen, setApiKeyDialogOpen] = useState(false);
+  const [freesoundRefresh, setFreesoundRefresh] = useState(0);
   const [urlDialogOpen, setUrlDialogOpen] = useState(false);
   const [urlInput, setUrlInput] = useState("");
   const [urlName, setUrlName] = useState("");
@@ -356,6 +357,7 @@ export default function SamplesPanel({ onInsertSample, onPlaySample, refreshKey,
           <FreesoundSearch
             onInsertSample={onInsertSample}
             onOpenApiKeyDialog={() => setApiKeyDialogOpen(true)}
+            refreshKey={freesoundRefresh}
           />
         )}
 
@@ -429,6 +431,7 @@ export default function SamplesPanel({ onInsertSample, onPlaySample, refreshKey,
       <ApiKeyDialog
         open={apiKeyDialogOpen}
         onOpenChange={setApiKeyDialogOpen}
+        onKeySaved={() => setFreesoundRefresh(k => k + 1)}
       />
     </div>
   );

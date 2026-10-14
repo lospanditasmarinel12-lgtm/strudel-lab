@@ -18,12 +18,17 @@ export default function ApiKeyDialog({ open, onOpenChange, onKeySaved }: ApiKeyD
   const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
-    if (open) {
-      const existing = getApiKey();
+    if (!open) return;
+    let active = true;
+    getApiKey().then((existing) => {
+      if (!active) return;
       setInputKey(existing || '');
       setStatus(existing ? 'typing' : 'idle');
       setErrorMsg('');
-    }
+    });
+    return () => {
+      active = false;
+    };
   }, [open]);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,9 +52,9 @@ export default function ApiKeyDialog({ open, onOpenChange, onKeySaved }: ApiKeyD
     }
   }, [inputKey]);
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     if (status !== 'valid' && status !== 'typing') return;
-    setApiKey(inputKey.trim());
+    await setApiKey(inputKey.trim());
     onKeySaved?.();
     onOpenChange(false);
   }, [status, inputKey, onKeySaved, onOpenChange]);

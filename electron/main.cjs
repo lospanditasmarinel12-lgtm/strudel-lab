@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, safeStorage } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const fs = require('fs');
@@ -129,6 +129,70 @@ ipcMain.handle('youtube:cancel', async () => {
     return true;
   }
   return false;
+});
+
+// ---------------------------------------------------------------------------
+// Secure key/value store (API keys) using the OS keychain via safeStorage.
+// Values are encrypted with the OS-protected key when available; otherwise they
+// are stored plaintext as a fallback so the app still works.
+// ---------------------------------------------------------------------------
+
+function secureFilePath() {
+  return path.join(app.getPath('userData'), 'secure-store.json');
+}
+
+function readSecureFile() {
+  try {
+    return JSON.parse(fs.readFileSync(secureFilePath(), 'utf8')) || {};
+  } catch {
+    return {};
+  }
+}
+
+function writeSecureFile(obj) {
+  try {
+    fs.writeFileSync(secureFilePath(), JSON.stringify(obj), { mode: 0o600 });
+  } catch (err) {
+    console.error('[secure-store] write failed:', err.message);
+  }
+}
+
+ipcMain.handle('secure:set', async (_event, key, value) => {
+  if (typeof key !== 'string' || typeof value !== 'string') return false;
+  const store = readSecureFile();
+  try {
+    if (safeStorage.isEncryptionAvailable()) {
+      store[key] = { enc: safeStorage.encryptString(value).toString('base64') };
+    } else {
+      store[key] = { plain: value };
+    }
+  } catch {
+    store[key] = { plain: value };
+  }
+  writeSecureFile(store);
+  return true;
+});
+
+ipcMain.handle('secure:get', async (_event, key) => {
+  if (typeof key !== 'string') return null;
+  const entry = readSecureFile()[key];
+  if (!entry) return null;
+  if (entry.enc) {
+    try {
+      return safeStorage.decryptString(Buffer.from(entry.enc, 'base64'));
+    } catch {
+      return null;
+    }
+  }
+  return entry.plain ?? null;
+});
+
+ipcMain.handle('secure:clear', async (_event, key) => {
+  if (typeof key !== 'string') return false;
+  const store = readSecureFile();
+  delete store[key];
+  writeSecureFile(store);
+  return true;
 });
 
 app.whenReady().then(createWindow);

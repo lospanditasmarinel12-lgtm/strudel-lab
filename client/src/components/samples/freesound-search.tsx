@@ -9,9 +9,12 @@ import { registerCustomSample } from '@/lib/sample-registry';
 export interface FreesoundSearchProps {
   onInsertSample: (name: string) => void;
   onOpenApiKeyDialog: () => void;
+  /** Bump to re-check whether an API key is present (e.g. after saving one). */
+  refreshKey?: number;
 }
 
-export default function FreesoundSearch({ onInsertSample, onOpenApiKeyDialog }: FreesoundSearchProps) {
+export default function FreesoundSearch({ onInsertSample, onOpenApiKeyDialog, refreshKey }: FreesoundSearchProps) {
+  const [hasKey, setHasKey] = useState<boolean | null>(null);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<FreesoundSound[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -36,6 +39,16 @@ export default function FreesoundSearch({ onInsertSample, onOpenApiKeyDialog }: 
       abortRef.current?.abort();
     };
   }, []);
+
+  useEffect(() => {
+    let active = true;
+    hasApiKey().then((present) => {
+      if (active) setHasKey(present);
+    });
+    return () => {
+      active = false;
+    };
+  }, [refreshKey]);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -126,7 +139,15 @@ export default function FreesoundSearch({ onInsertSample, onOpenApiKeyDialog }: 
     setPreviewId(sound.id);
   }, [previewId]);
 
-  if (!hasApiKey()) {
+  if (hasKey === null) {
+    return (
+      <div className="flex items-center justify-center h-24 text-muted-foreground">
+        <Loader2 size={16} className="animate-spin" />
+      </div>
+    );
+  }
+
+  if (hasKey === false) {
     return (
       <div className="flex flex-col items-center justify-center h-40 gap-3 px-4">
         <p className="text-muted-foreground text-xs text-center">
