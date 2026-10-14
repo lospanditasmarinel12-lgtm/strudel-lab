@@ -179,7 +179,7 @@ export function buildTracksFromSnapshots(
     tracks.push({
       name: entry.name,
       category: entry.category,
-      color: cat?.color ?? '#6b7280',
+      color: cat?.color ?? '#93A69E',
       events: entry.events,
       modifiers: [],
     });
@@ -270,7 +270,7 @@ export function buildAdaptiveTracksFromSnapshots(
     tracks.push({
       name,
       category: inferCategory(name),
-      color: cat?.color ?? '#6b7280',
+      color: cat?.color ?? '#93A69E',
       events,
       modifiers: [],
     });

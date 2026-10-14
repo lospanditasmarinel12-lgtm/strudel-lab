@@ -84,8 +84,8 @@ describe('canvas: PatternVisualizer rendering assertions', () => {
     render(<PatternVisualizer isPlaying={false} code={code} />);
     const kickLabel = screen.getByText('KICK');
     expect(kickLabel).toBeTruthy();
-    // KICK should be cyan (#06b6d4)
-    expect(kickLabel.style.color).toBe('rgb(6, 182, 212)');
+    // KICK should be phosphor green (#4BE38A)
+    expect(kickLabel.style.color).toBe('rgb(75, 227, 138)');
   });
 
   it('renders beat indicator with STOPPED/PLAYING label', () => {

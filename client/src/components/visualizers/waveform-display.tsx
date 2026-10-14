@@ -22,11 +22,11 @@ export function WaveformDisplay({ isPlaying, audioData, className = "" }: Wavefo
 
     const draw = () => {
       // Clear canvas
-      ctx.fillStyle = '#000000';
+      ctx.fillStyle = '#0A0C0B';
       ctx.fillRect(0, 0, width, height);
 
       // Draw waveform grid
-      ctx.strokeStyle = '#0891b2';
+      ctx.strokeStyle = '#1E2A26';
       ctx.lineWidth = 0.5;
       ctx.setLineDash([2, 2]);
       
@@ -49,7 +49,7 @@ export function WaveformDisplay({ isPlaying, audioData, className = "" }: Wavefo
       if (isPlaying) {
         // Generate animated waveform
         const time = Date.now() * 0.001;
-        ctx.strokeStyle = '#06b6d4';
+        ctx.strokeStyle = '#4BE38A';
         ctx.lineWidth = 2;
         ctx.beginPath();
 
@@ -74,7 +74,7 @@ export function WaveformDisplay({ isPlaying, audioData, className = "" }: Wavefo
         ctx.stroke();
 
         // Add bass frequency visualization
-        ctx.strokeStyle = '#f97316';
+        ctx.strokeStyle = '#FFB000';
         ctx.lineWidth = 3;
         ctx.beginPath();
         
@@ -93,7 +93,7 @@ export function WaveformDisplay({ isPlaying, audioData, className = "" }: Wavefo
         ctx.stroke();
       } else {
         // Static waveform
-        ctx.strokeStyle = '#0f4a5c';
+        ctx.strokeStyle = '#1E2A26';
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(0, height / 2);

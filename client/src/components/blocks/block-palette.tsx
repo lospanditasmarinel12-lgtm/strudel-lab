@@ -51,7 +51,7 @@ export default function BlockPalette({ enabled }: BlockPaletteProps) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1.5 w-full px-2 py-1.5 border-b border-strudel-surface-light text-[10px] font-bold text-strudel-accent uppercase"
+        className="flex items-center gap-1.5 w-full px-2 py-1.5 border-b border-strudel-surface-light font-display text-[11px] font-semibold tracking-wide text-strudel-accent"
       >
         {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
         <Boxes size={12} />

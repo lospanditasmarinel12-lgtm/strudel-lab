@@ -28,9 +28,9 @@ function nodeLabel(node: StructureNode): string {
 }
 
 function nodeColor(node: StructureNode, index: number): string {
-  if (node.kind === 'container') return '#3B82F6';
-  if (node.kind === 'raw') return '#6b7280';
-  if (node.kind === 'section' && node.pattern.kind === 'raw-pattern') return '#6b7280';
+  if (node.kind === 'container') return '#6FB7FF';
+  if (node.kind === 'raw') return '#93A69E';
+  if (node.kind === 'section' && node.pattern.kind === 'raw-pattern') return '#93A69E';
   return pickRowColor(index);
 }
 

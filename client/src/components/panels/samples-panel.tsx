@@ -282,7 +282,7 @@ export default function SamplesPanel({ onInsertSample, onPlaySample, refreshKey,
         {originTab === 'custom' && customSamples.length > 0 && (
           <SampleSection
             label="MY SAMPLES"
-            color="#a855f7"
+            color="#E0A9FF"
             items={customSamples.map(s => s.name)}
             onInsert={onInsertSample}
             onPlay={onPlaySample}
@@ -294,7 +294,7 @@ export default function SamplesPanel({ onInsertSample, onPlaySample, refreshKey,
         {originTab === 'custom' && discoveredBanks.length > 0 && (
           <SampleSection
             label="DISCOVERED"
-            color="#22c55e"
+            color="#4BE38A"
             items={discoveredBanks}
             onInsert={name => onInsertSample(name)}
             onPlay={name => onPlaySample(name)}
@@ -304,7 +304,7 @@ export default function SamplesPanel({ onInsertSample, onPlaySample, refreshKey,
         {originTab === 'builtin' && customSamples.length > 0 && (
           <SampleSection
             label="MY SAMPLES"
-            color="#a855f7"
+            color="#E0A9FF"
             items={customSamples.map(s => s.name)}
             onInsert={onInsertSample}
             onPlay={onPlaySample}
@@ -316,7 +316,7 @@ export default function SamplesPanel({ onInsertSample, onPlaySample, refreshKey,
         {originTab === 'builtin' && discoveredBanks.length > 0 && (
           <SampleSection
             label="DISCOVERED"
-            color="#22c55e"
+            color="#4BE38A"
             items={discoveredBanks}
             onInsert={name => onInsertSample(name)}
             onPlay={name => onPlaySample(name)}

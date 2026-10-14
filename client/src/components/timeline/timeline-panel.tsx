@@ -168,17 +168,17 @@ export default function TimelinePanel({
     const trackArea = w - leftMargin - 10;
     const displayDuration = Math.max(duration, 10000);
 
-    ctx.fillStyle = '#0a0a14';
+    ctx.fillStyle = '#0A0C0B';
     ctx.fillRect(0, 0, w, h);
 
     // Time ruler
-    ctx.fillStyle = '#6B7280';
+    ctx.fillStyle = '#93A69E';
     ctx.font = '9px "JetBrains Mono", monospace';
     ctx.textAlign = 'center';
     for (let t = 0; t <= displayDuration; t += 2000) {
       const x = leftMargin + (t / displayDuration) * trackArea;
       ctx.fillText(formatTimeRuler(t), x, 12);
-      ctx.strokeStyle = '#1E1B4B';
+      ctx.strokeStyle = '#1E2A26';
       ctx.lineWidth = 0.5;
       ctx.beginPath();
       ctx.moveTo(x, 18);
@@ -189,7 +189,7 @@ export default function TimelinePanel({
     // Playhead
     if (currentTime > 0) {
       const px = leftMargin + (currentTime / displayDuration) * trackArea;
-      ctx.strokeStyle = '#ffffff';
+      ctx.strokeStyle = '#E6EFE9';
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(px, 18);
@@ -208,11 +208,11 @@ export default function TimelinePanel({
       ctx.fillText(track.name, leftMargin - 6, y + trackHeight / 2 + 4);
 
       // Track bg
-      ctx.fillStyle = i % 2 === 0 ? '#0a0a14' : '#0e0e1a';
+      ctx.fillStyle = i % 2 === 0 ? '#0A0C0B' : '#101713';
       ctx.fillRect(leftMargin, y, trackArea, trackHeight);
 
       // Track separator
-      ctx.strokeStyle = '#1a1a2e';
+      ctx.strokeStyle = '#1A2622';
       ctx.lineWidth = 0.5;
       ctx.beginPath();
       ctx.moveTo(leftMargin, y + trackHeight);
@@ -233,7 +233,7 @@ export default function TimelinePanel({
         ctx.fillRect(ex, y + 2, Math.min(ew, 3), trackHeight - 4);
 
         if (selectedEventId && ((event as any).id || `${event.startMs}`) === selectedEventId) {
-          ctx.strokeStyle = '#ffffff';
+          ctx.strokeStyle = '#E6EFE9';
           ctx.lineWidth = 2;
           ctx.strokeRect(ex, y + 2, ew, trackHeight - 4);
         }
@@ -241,7 +241,7 @@ export default function TimelinePanel({
     });
 
     if (tracks.length === 0) {
-      ctx.fillStyle = '#6B7280';
+      ctx.fillStyle = '#93A69E';
       ctx.font = '12px "JetBrains Mono", monospace';
       ctx.textAlign = 'center';
       ctx.fillText('No tracks — press ● to start recording', w / 2, h / 2);

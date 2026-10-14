@@ -69,7 +69,7 @@ export default memo(function BlockBar({ block, active, onDragStart, onRemove, on
       className={`flex items-center gap-1.5 h-[24px] px-1.5 rounded-sm border bg-strudel-surface/95 text-white select-none ${
         active ? 'border-strudel-accent ring-1 ring-strudel-accent' : 'border-strudel-surface-light'
       }`}
-      style={{ borderLeft: `3px solid ${row?.color ?? '#6b7280'}` }}
+      style={{ borderLeft: `3px solid ${row?.color ?? '#93A69E'}` }}
     >
       <button
         type="button"

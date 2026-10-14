@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid';
-import { DRUM_SAMPLES, MELODIC_SAMPLES, SYNTH_SAMPLES } from '@shared/schema';
+import { DRUM_SAMPLES, MELODIC_SAMPLES, SYNTH_SAMPLES, PALETTE } from '@shared/schema';
 import { getModifierDef } from '@/lib/modifier-registry';
 
 export type GridRowKind = 'drum' | 'note';
@@ -55,7 +55,16 @@ export const SAMPLE_CHOICES: string[] = Array.from(
 
 export const DEFAULT_DRUM_SAMPLES = ['bd', 'sd', 'hh', 'oh', 'cp'];
 
-const ROW_COLORS = ['#ef4444', '#3b82f6', '#22c55e', '#a855f7', '#f59e0b', '#14b8a6', '#ec4899', '#84cc16'];
+const ROW_COLORS = [
+  PALETTE.amber,
+  PALETTE.green,
+  PALETTE.blue,
+  PALETTE.red,
+  PALETTE.lavender,
+  PALETTE.mint,
+  PALETTE.amberLight,
+  PALETTE.green,
+];
 
 export function pickRowColor(index: number): string {
   return ROW_COLORS[index % ROW_COLORS.length];

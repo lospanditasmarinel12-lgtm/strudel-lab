@@ -61,13 +61,37 @@ export interface TrackCategory {
   custom: { color: string; label: string };
 }
 
+/**
+ * Strudel Lab palette — "Phosphor / Oscilloscope".
+ * Amber = controls/chrome; phosphor green = the live signal. All pairs pass WCAG AA.
+ * Single source of truth shared by CSS variables, the Monaco theme, and canvas renderers.
+ */
+export const PALETTE = {
+  bg: '#0A0C0B',
+  surface: '#121816',
+  surfaceLight: '#1E2A26',
+  text: '#E6EFE9',
+  muted: '#93A69E',
+  amber: '#FFB000',
+  amberLight: '#FFCB57',
+  green: '#4BE38A',
+  mint: '#9BE7C4',
+  blue: '#6FB7FF',
+  red: '#FF6B4A',
+  error: '#FF5C57',
+  warning: '#F5A524',
+  lavender: '#E0A9FF',
+  grid: '#1A2622',
+  gridAlt: '#101713',
+} as const;
+
 export const TRACK_CATEGORIES: TrackCategory = {
-  drums: { color: '#ef4444', label: 'Drums' },
-  bass: { color: '#3b82f6', label: 'Bass' },
-  melodic: { color: '#22c55e', label: 'Melodic' },
-  ambient: { color: '#a855f7', label: 'Ambient' },
-  fx: { color: '#f59e0b', label: 'FX' },
-  custom: { color: '#14b8a6', label: 'Custom' },
+  drums: { color: PALETTE.red, label: 'Drums' },
+  bass: { color: PALETTE.amber, label: 'Bass' },
+  melodic: { color: PALETTE.green, label: 'Melodic' },
+  ambient: { color: PALETTE.blue, label: 'Ambient' },
+  fx: { color: PALETTE.lavender, label: 'FX' },
+  custom: { color: PALETTE.mint, label: 'Custom' },
 };
 
 export const DRUM_SAMPLES = ['bd', 'sd', 'hh', 'oh', 'cp', 'rim', 'crash', 'ride', 'clap', 'tom'];

@@ -10,6 +10,10 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      fontFamily: {
+        mono: ['"JetBrains Mono"', "monospace"],
+        display: ['"Chakra Petch"', '"JetBrains Mono"', "monospace"],
+      },
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",

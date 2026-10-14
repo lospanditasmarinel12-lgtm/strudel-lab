@@ -83,7 +83,7 @@ export class LocationHighlighter {
         options: {
           inlineClassName: 'strudel-mini-atom',
           overviewRuler: {
-            color: 'rgba(139, 92, 246, 0.4)',
+            color: 'rgba(75, 227, 138, 0.4)',
             position: monaco.editor.OverviewRulerLane.Right,
           },
         },
@@ -109,7 +109,7 @@ export class LocationHighlighter {
       const range = this.offsetRangeToMonacoRange(model, Math.max(0, from), Math.min(to, model.getValueLength()));
       if (!range) continue;
 
-      const hexColor = color || '#8B5CF6';
+      const hexColor = color || '#FFB000';
 
       const options: monaco.editor.IModelDecorationOptions = {
         className: 'strudel-active-atom',

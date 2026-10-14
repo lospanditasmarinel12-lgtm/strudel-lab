@@ -32,7 +32,7 @@ export function PatternVisualizer({ isPlaying, code, className = "" }: PatternVi
       drumsMatch.forEach((match, index) => {
         const pattern = match.match(/s\("([^"]+)"\)/)?.[1] || "";
         const steps = parsePattern(pattern);
-        const colors = ['#06b6d4', '#f97316', '#eab308', '#10b981', '#8b5cf6'];
+        const colors = ['#4BE38A', '#FFB000', '#FFCB57', '#9BE7C4', '#E0A9FF'];
         
         extractedLayers.push({
           name: getPatternName(pattern, index),
@@ -52,7 +52,7 @@ export function PatternVisualizer({ isPlaying, code, className = "" }: PatternVi
         extractedLayers.push({
           name: `BASS ${index + 1}`,
           pattern: steps,
-          color: '#dc2626'
+          color: '#FF6B4A'
         });
       });
     }
@@ -60,9 +60,9 @@ export function PatternVisualizer({ isPlaying, code, className = "" }: PatternVi
     // Fallback patterns if no code
     if (extractedLayers.length === 0) {
       extractedLayers.push(
-        { name: 'KICK', pattern: [true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false], color: '#06b6d4' },
-        { name: 'SNARE', pattern: [false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false], color: '#f97316' },
-        { name: 'HIHAT', pattern: [true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true], color: '#eab308' }
+        { name: 'KICK', pattern: [true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false], color: '#4BE38A' },
+        { name: 'SNARE', pattern: [false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false], color: '#FFB000' },
+        { name: 'HIHAT', pattern: [true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true], color: '#FFCB57' }
       );
     }
 

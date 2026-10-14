@@ -31,7 +31,7 @@ import ErrorBoundary from "@/components/error-boundary";
 import type { MonacoEditorInstance } from "@/components/editor/monaco-editor";
 
 
-import type { Project, ParsedTrack } from "@shared/schema";
+import { TRACK_CATEGORIES, type Project, type ParsedTrack } from "@shared/schema";
 
 type ConsoleMessage = {
   text: string;
@@ -447,7 +447,7 @@ export default function Studio() {
             <ErrorBoundary name="Timeline">
               <div className="border-t border-strudel-surface-light bg-strudel-surface h-48">
                 <div className="flex items-center px-3 py-1 border-b border-strudel-surface-light">
-                  <span className="text-xs text-strudel-accent font-bold">TIMELINE</span>
+                  <span className="font-display text-xs text-strudel-accent font-semibold tracking-wide">TIMELINE</span>
                 </div>
                 <TrackControls
                   tracks={currentTracks}
@@ -571,15 +571,8 @@ export default function Studio() {
 }
 
 function getTrackColor(category: string): string {
-  const colors: Record<string, string> = {
-    drums: '#ef4444',
-    bass: '#3b82f6',
-    melodic: '#22c55e',
-    ambient: '#a855f7',
-    fx: '#f59e0b',
-    custom: '#14b8a6',
-  };
-  return colors[category] || '#14b8a6';
+  const cat = TRACK_CATEGORIES[category as keyof typeof TRACK_CATEGORIES];
+  return cat?.color ?? TRACK_CATEGORIES.custom.color;
 }
 
 function formatDuration(ms: number): string {

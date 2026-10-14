@@ -215,7 +215,7 @@ export default memo(function TopBar({
             />
           </div>
           <div className="w-px h-5 bg-strudel-surface-light" />
-          <span className="text-xs text-muted-foreground">
+          <span className="font-display text-sm tracking-wide text-foreground">
             {selectedProject ? selectedProject.name : 'No project'}
           </span>
           <span className="text-[10px] text-strudel-accent ml-2">● LIVE</span>

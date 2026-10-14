@@ -30,7 +30,7 @@ export default class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex items-center justify-center h-full bg-[#0a0a14] text-white p-4 min-h-[60px]">
+        <div className="flex items-center justify-center h-full bg-strudel-dark text-white p-4 min-h-[60px]">
           <div className="text-center space-y-2">
             <p className="text-xs font-bold text-red-400">
               {this.props.name ? `${this.props.name} crashed` : 'Something went wrong'}

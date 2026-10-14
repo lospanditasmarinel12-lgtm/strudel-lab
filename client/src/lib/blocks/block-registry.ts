@@ -1,3 +1,4 @@
+import { PALETTE } from '@shared/schema';
 import { ALL_MODIFIERS, type ModifierDef } from '@/lib/modifier-registry';
 import { defaultEffectValue } from '@/lib/visual/visual-model';
 import type { LegoPayload } from './drag-controller';
@@ -34,11 +35,11 @@ export interface BlockDef {
 }
 
 export const CATEGORY_COLORS: Record<BlockCategory, string> = {
-  pattern: '#00D4AA',
-  effect: '#F59E0B',
-  transform: '#8B5CF6',
-  combinator: '#3B82F6',
-  value: '#22C55E',
+  pattern: PALETTE.green,
+  effect: PALETTE.amber,
+  transform: PALETTE.blue,
+  combinator: PALETTE.lavender,
+  value: PALETTE.mint,
 };
 
 export const CATEGORY_LABELS: Record<BlockCategory, string> = {

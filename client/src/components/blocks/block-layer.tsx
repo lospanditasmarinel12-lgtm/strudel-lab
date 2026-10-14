@@ -27,7 +27,7 @@ const BAR_HEIGHT = 26;
 
 const BLOCK_LAYER_CSS = `
 .strudel-block-zone { box-sizing: border-box; padding: 1px 8px 1px 0; overflow: visible; z-index: 4; }
-.strudel-block-drop { background: linear-gradient(to bottom, #8B5CF6 0 2px, transparent 2px 100%); }
+.strudel-block-drop { background: linear-gradient(to bottom, #FFB000 0 2px, transparent 2px 100%); }
 `;
 
 export default function BlockLayer({ editor, code, enabled }: BlockLayerProps) {

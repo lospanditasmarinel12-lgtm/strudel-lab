@@ -47,6 +47,17 @@ This project is built on the Strudel live-coding language and libraries
 The @strudel/* packages and superdough are licensed AGPL-3.0-or-later.
 
 --------------------------------------------------------------------------------
+DEVELOPMENT / AGENT SKILLS
+--------------------------------------------------------------------------------
+Design guidance skills under .agents/skills/ are from the Anthropic Agent Skills
+repository and are licensed Apache-2.0:
+  https://github.com/anthropics/skills
+  Copyright Anthropic, PBC — Apache-2.0
+  - frontend-design (design direction, typography, layout)
+  - theme-factory   (theme palettes, contrast)
+These are development-time tools and are not part of the shipped application.
+
+--------------------------------------------------------------------------------
 THIRD-PARTY DEPENDENCIES
 --------------------------------------------------------------------------------
 Bundled third-party dependency notices and license texts are listed in

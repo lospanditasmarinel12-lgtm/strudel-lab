@@ -21,11 +21,11 @@ interface SessionTimelinePanelProps {
 }
 
 const MARKER_COLORS: Record<string, string> = {
-  edit: '#3b82f6',
-  evaluate: '#22c55e',
-  play: '#06b6d4',
-  stop: '#ef4444',
-  bpm_change: '#eab308',
+  edit: '#6FB7FF',
+  evaluate: '#4BE38A',
+  play: '#FFB000',
+  stop: '#FF5C57',
+  bpm_change: '#FFCB57',
 };
 
 const DIAMOND_HW = 6;
@@ -97,17 +97,17 @@ export default function SessionTimelinePanel({
     const trackArea = w - leftMargin - 10;
     const displayDuration = Math.max(duration, 10000);
 
-    ctx.fillStyle = '#0a0a14';
+    ctx.fillStyle = '#0A0C0B';
     ctx.fillRect(0, 0, w, h);
 
     // Time ruler
-    ctx.fillStyle = '#6B7280';
+    ctx.fillStyle = '#93A69E';
     ctx.font = '9px "JetBrains Mono", monospace';
     ctx.textAlign = 'center';
     for (let t = 0; t <= displayDuration; t += 2000) {
       const x = leftMargin + (t / displayDuration) * trackArea;
       ctx.fillText(formatTimeRuler(t), x, 12);
-      ctx.strokeStyle = '#1E1B4B';
+      ctx.strokeStyle = '#1E2A26';
       ctx.lineWidth = 0.5;
       ctx.beginPath();
       ctx.moveTo(x, 18);
@@ -118,7 +118,7 @@ export default function SessionTimelinePanel({
     // Playhead
     if (currentTime > 0) {
       const px = leftMargin + (currentTime / displayDuration) * trackArea;
-      ctx.strokeStyle = '#ffffff';
+      ctx.strokeStyle = '#E6EFE9';
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(px, 18);
@@ -130,7 +130,7 @@ export default function SessionTimelinePanel({
     for (const snap of snapshots) {
       const sx = leftMargin + (snap.timestamp / displayDuration) * trackArea;
       const sy = 24;
-      const color = MARKER_COLORS[snap.actionType] || '#6B7280';
+      const color = MARKER_COLORS[snap.actionType] || '#93A69E';
       const isSelected = snap.id === currentSnapshotId;
 
       ctx.fillStyle = color;
@@ -143,14 +143,14 @@ export default function SessionTimelinePanel({
       ctx.fill();
 
       if (isSelected) {
-        ctx.strokeStyle = '#ffffff';
+        ctx.strokeStyle = '#E6EFE9';
         ctx.lineWidth = 2;
         ctx.stroke();
       }
 
       // Small code preview snippet below the diamond
       if (isSelected || editable) {
-        ctx.fillStyle = '#9CA3AF';
+        ctx.fillStyle = '#93A69E';
         ctx.font = '7px "JetBrains Mono", monospace';
         ctx.textAlign = 'center';
         const snippet = snap.code.replace(/^s\("?|"?\).*$|".*$/g, '').substring(0, 20);
@@ -159,7 +159,7 @@ export default function SessionTimelinePanel({
     }
 
     if (snapshots.length === 0) {
-      ctx.fillStyle = '#6B7280';
+      ctx.fillStyle = '#93A69E';
       ctx.font = '12px "JetBrains Mono", monospace';
       ctx.textAlign = 'center';
       ctx.fillText('No snapshots — record a session first', w / 2, h / 2);

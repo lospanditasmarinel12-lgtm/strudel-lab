@@ -19,11 +19,11 @@ interface BankEntry {
 }
 
 const categoryInfo: Record<string, { color: string; label: string }> = {
-  drums: { color: '#ef4444', label: 'Drums' },
-  bass: { color: '#3b82f6', label: 'Bass' },
-  melodic: { color: '#22c55e', label: 'Melodic' },
-  ambient: { color: '#a855f7', label: 'Ambient' },
-  fx: { color: '#f59e0b', label: 'FX' },
+  drums: { color: '#FF6B4A', label: 'Drums' },
+  bass: { color: '#FFB000', label: 'Bass' },
+  melodic: { color: '#4BE38A', label: 'Melodic' },
+  ambient: { color: '#6FB7FF', label: 'Ambient' },
+  fx: { color: '#E0A9FF', label: 'FX' },
 };
 
 function categorizeBank(bankName: string): BankCategory {
