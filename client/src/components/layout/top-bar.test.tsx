@@ -44,6 +44,7 @@ vi.mock('lucide-react', function() {
     PanelLeft: function() { return <span>PanelLeftIcon</span>; },
     PanelBottom: function() { return <span>PanelBottomIcon</span>; },
     Blocks: function() { return <span>BlocksIcon</span>; },
+    Grid3x3: function() { return <span>GridIcon</span>; },
   };
 });
 
@@ -68,6 +69,10 @@ function defaultProps() {
     onToggleTimeline: vi.fn(),
     showVisual: false,
     onToggleVisual: vi.fn(),
+    showCanvas: false,
+    onToggleCanvas: vi.fn(),
+    showGrid: false,
+    onToggleGrid: vi.fn(),
     focusMode: false,
     onToggleFocus: vi.fn(),
     showSidebar: true,
@@ -99,12 +104,12 @@ describe('TopBar', function() {
 
   it('shows Record button', function() {
     render(<TopBar {...defaultProps()} />);
-    expect(screen.getByTitle('Start Recording')).toBeTruthy();
+    expect(screen.getByTitle('Start recording')).toBeTruthy();
   });
 
   it('shows Stop Recording when recording', function() {
     render(<TopBar {...defaultProps()} recording={true} />);
-    expect(screen.getByTitle('Stop Recording')).toBeTruthy();
+    expect(screen.getByTitle('Stop recording')).toBeTruthy();
   });
 
   it('shows Pause button when recording', function() {
@@ -114,19 +119,19 @@ describe('TopBar', function() {
 
   it('shows LIVE button', function() {
     render(<TopBar {...defaultProps()} />);
-    expect(screen.getByText('LIVE')).toBeTruthy();
+    expect(screen.getByText('Live')).toBeTruthy();
   });
 
   it('shows DAW button', function() {
     render(<TopBar {...defaultProps()} />);
-    expect(screen.getByText('DAW')).toBeTruthy();
+    expect(screen.getAllByText('Timeline').length).toBeGreaterThan(0);
   });
 
   it('shows BLOCKS button and calls onToggleVisual', async function() {
     const onToggleVisual = vi.fn();
     const user = userEvent.setup();
     render(<TopBar {...defaultProps()} onToggleVisual={onToggleVisual} />);
-    const btn = screen.getByText('BLOCKS');
+    const btn = screen.getByText('Blocks');
     expect(btn).toBeTruthy();
     await user.click(btn);
     expect(onToggleVisual).toHaveBeenCalled();
@@ -163,15 +168,15 @@ describe('TopBar', function() {
     const onToggleRecord = vi.fn();
     const user = userEvent.setup();
     render(<TopBar {...defaultProps()} onToggleRecord={onToggleRecord} />);
-    await user.click(screen.getByTitle('Start Recording'));
+    await user.click(screen.getByTitle('Start recording'));
     expect(onToggleRecord).toHaveBeenCalled();
   });
 
   it('shows FOCUS button by default and EXIT FOCUS in focus mode', function() {
     const { rerender } = render(<TopBar {...defaultProps()} />);
-    expect(screen.getByText('FOCUS')).toBeTruthy();
+    expect(screen.getByText('Focus')).toBeTruthy();
 
     rerender(<TopBar {...defaultProps()} focusMode={true} />);
-    expect(screen.getByText('EXIT FOCUS')).toBeTruthy();
+    expect(screen.getByText('Exit focus')).toBeTruthy();
   });
 });

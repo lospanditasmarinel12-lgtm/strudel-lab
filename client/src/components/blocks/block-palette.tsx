@@ -62,7 +62,7 @@ export default function BlockPalette({ enabled }: BlockPaletteProps) {
         <div className="max-h-[45vh] overflow-auto p-1.5 space-y-2">
           {CATEGORY_ORDER.map((category) => (
             <div key={category} className="space-y-1">
-              <div className="text-[8px] uppercase text-muted-foreground px-0.5">{CATEGORY_TITLES[category]}</div>
+              <div className="text-[8px] text-muted-foreground px-0.5">{CATEGORY_TITLES[category]}</div>
               {byCategory[category].map((def) => (
                 <Lego key={def.id} def={def} />
               ))}

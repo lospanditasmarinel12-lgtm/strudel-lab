@@ -14,3 +14,7 @@ vite.config.ts.*
 # Downloaded binary (fetched by scripts/download-yt-dlp.mjs)
 extraResources/yt-dlp
 extraResources/yt-dlp.exe
+
+# Markdown docs (planning/design/reports) — keep the project README
+*.md
+!README.md

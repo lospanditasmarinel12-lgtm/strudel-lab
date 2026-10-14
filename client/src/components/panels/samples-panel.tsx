@@ -208,13 +208,13 @@ export default function SamplesPanel({ onInsertSample, onPlaySample, refreshKey,
           <button
             key={tab}
             onClick={() => setOriginTab(tab)}
-            className={`text-[10px] px-2 py-0.5 rounded uppercase ${
+            className={`font-display text-[11px] px-2 py-0.5 rounded ${
               originTab === tab
-                ? 'bg-strudel-primary text-white'
+                ? 'bg-strudel-primary text-black'
                 : 'text-muted-foreground hover:text-white'
             }`}
           >
-            {tab === 'freesound' ? '🌐 FREESOUND' : tab === 'builtin' ? 'BUILT-IN' : tab === 'modifiers' ? 'FX' : tab}
+            {tab === 'freesound' ? '🌐 Freesound' : tab === 'builtin' ? 'Built-in' : tab === 'modifiers' ? 'FX' : tab}
           </button>
         ))}
       </div>
@@ -223,7 +223,7 @@ export default function SamplesPanel({ onInsertSample, onPlaySample, refreshKey,
         <div className="flex gap-1 p-1 border-b border-strudel-surface-light flex-wrap">
           <button
             onClick={() => setActiveCategory(null)}
-            className={`text-[10px] px-2 py-0.5 rounded ${!activeCategory ? 'bg-strudel-primary text-white' : 'text-muted-foreground hover:text-white'}`}
+            className={`text-[10px] px-2 py-0.5 rounded ${!activeCategory ? 'bg-strudel-primary text-black' : 'text-muted-foreground hover:text-white'}`}
           >
             ALL
           </button>
@@ -231,7 +231,7 @@ export default function SamplesPanel({ onInsertSample, onPlaySample, refreshKey,
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`text-[10px] px-2 py-0.5 rounded ${activeCategory === cat ? 'bg-strudel-primary text-white' : 'text-muted-foreground hover:text-white'}`}
+              className={`text-[10px] px-2 py-0.5 rounded ${activeCategory === cat ? 'bg-strudel-primary text-black' : 'text-muted-foreground hover:text-white'}`}
             >
               {cat}
             </button>
@@ -323,18 +323,18 @@ export default function SamplesPanel({ onInsertSample, onPlaySample, refreshKey,
           />
         )}
 
-        {originTab === 'builtin' && displayedBuiltin.length > 0 && <div className="px-2 py-1 text-[10px] font-bold text-muted-foreground border-b border-strudel-surface-light">
-          ● BUILT-IN
+        {originTab === 'builtin' && displayedBuiltin.length > 0 && <div className="px-2 py-1 font-display text-[11px] font-semibold text-muted-foreground border-b border-strudel-surface-light">
+          ● Built-in
         </div>}
         {originTab === 'builtin' && displayedBuiltin.map(cat =>
           cat.sections.length > 0 && (
             <div key={cat.name}>
-              <div className="px-3 py-0.5 text-[9px] font-bold text-muted-foreground/60 uppercase">
+              <div className="px-3 py-0.5 text-[9px] font-bold text-muted-foreground/60">
                 {cat.name}
               </div>
               {cat.sections.map(sec => (
                 <div key={sec.label}>
-                  <div className="px-3 py-0.5 text-[8px] font-semibold text-muted-foreground/40 uppercase tracking-wider">
+                  <div className="px-3 py-0.5 text-[8px] font-semibold text-muted-foreground/40 tracking-wider">
                     {sec.label}
                   </div>
                   {sec.samples.map(sample => (
@@ -366,7 +366,7 @@ export default function SamplesPanel({ onInsertSample, onPlaySample, refreshKey,
             <p className="text-[9px] text-muted-foreground">Click a modifier to insert it at cursor.</p>
             {(Object.keys(MODIFIERS_BY_CATEGORY) as (keyof typeof MODIFIERS_BY_CATEGORY)[]).map(cat => (
               <div key={cat}>
-                <div className="text-[9px] font-bold text-muted-foreground/60 uppercase mb-1">{CATEGORY_LABELS[cat]}</div>
+                <div className="text-[9px] font-bold text-muted-foreground/60 mb-1">{CATEGORY_LABELS[cat]}</div>
                 {MODIFIERS_BY_CATEGORY[cat].map(mod => (
                   <ModifierRow
                     key={mod.name}

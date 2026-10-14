@@ -25,6 +25,7 @@ import TrackControls from "@/components/timeline/track-controls";
 import BlockLayer from "@/components/blocks/block-layer";
 import BlockPalette from "@/components/blocks/block-palette";
 import StructureCanvas from "@/components/visual/structure-canvas";
+import GridPanel from "@/components/visual/grid-panel";
 import { parse as parseStructure, serialize as serializeStructure } from "@/lib/visual/codec";
 import type { StructureModel } from "@/lib/visual/visual-model";
 import ErrorBoundary from "@/components/error-boundary";
@@ -52,6 +53,8 @@ export default function Studio() {
   const [showTimeline, setShowTimeline] = useState(false);
   const [showVisual, setShowVisual] = useState(false);
   const [showCanvas, setShowCanvas] = useState(false);
+  const [showGrid, setShowGrid] = useState(false);
+  const [evalFlash, setEvalFlash] = useState(0);
   const [showSidebar, setShowSidebar] = useState(true);
   const [showRightPanel, setShowRightPanel] = useState(true);
   const [showStatusBar, setShowStatusBar] = useState(true);
@@ -195,6 +198,7 @@ export default function Studio() {
     if (!code.trim()) return;
     if (!initialized) { addConsoleMessage('Audio not initialized yet. Click anywhere first.', 'warn'); return; }
     addConsoleMessage(`> evaluating...`, 'eval');
+    setEvalFlash(f => f + 1);
     try {
       recordAction(code, 'evaluate');
       await evaluate(code, (msg) => addConsoleMessage(msg, 'info'));
@@ -316,6 +320,10 @@ export default function Studio() {
     setShowCanvas(s => !s);
   }, []);
 
+  const handleToggleGrid = useCallback(() => {
+    setShowGrid(s => !s);
+  }, []);
+
   const handleCanvasChange = useCallback((model: StructureModel) => {
     handleCodeChange(serializeStructure(model));
   }, [handleCodeChange]);
@@ -370,7 +378,7 @@ export default function Studio() {
 
   return (
     <div
-      className="h-screen flex flex-col bg-strudel-dark text-white font-mono overflow-hidden"
+      className="reveal h-screen flex flex-col bg-strudel-dark text-white font-mono overflow-hidden"
       onDragOver={handleDragOver}
       onDrop={handleDropFile}
     >
@@ -395,6 +403,8 @@ export default function Studio() {
           onToggleVisual={handleToggleVisual}
           showCanvas={showCanvas}
           onToggleCanvas={handleToggleCanvas}
+          showGrid={showGrid}
+          onToggleGrid={handleToggleGrid}
           focusMode={focusMode}
           onToggleFocus={handleToggleFocus}
           showSidebar={showSidebar}
@@ -440,14 +450,30 @@ export default function Studio() {
               />
               <BlockLayer editor={editor} code={code} enabled={showVisual} />
               <BlockPalette enabled={showVisual} />
+              {evalFlash > 0 && (
+                <div key={evalFlash} className="eval-flash absolute inset-0 pointer-events-none z-10 rounded-sm" aria-hidden="true" />
+              )}
             </div>
           </ErrorBoundary>
+
+          {showGrid && (
+            <ErrorBoundary name="GridPanel">
+              <div className="border-t border-strudel-surface-light bg-strudel-surface h-56 flex flex-col">
+                <div className="flex items-center px-3 py-1 border-b border-strudel-surface-light">
+                  <span className="font-display text-xs text-strudel-accent font-semibold tracking-wide">Step grid</span>
+                </div>
+                <div className="flex-1 min-h-0">
+                  <GridPanel code={code} onChange={handleCodeChange} />
+                </div>
+              </div>
+            </ErrorBoundary>
+          )}
 
           {showTimeline && (
             <ErrorBoundary name="Timeline">
               <div className="border-t border-strudel-surface-light bg-strudel-surface h-48">
                 <div className="flex items-center px-3 py-1 border-b border-strudel-surface-light">
-                  <span className="font-display text-xs text-strudel-accent font-semibold tracking-wide">TIMELINE</span>
+                  <span className="font-display text-xs text-strudel-accent font-semibold tracking-wide">Timeline</span>
                 </div>
                 <TrackControls
                   tracks={currentTracks}
@@ -474,17 +500,19 @@ export default function Studio() {
                   key={tab}
                   onClick={() => setRightPanelTab(tab)}
                   data-testid={`panel-tab-${tab}`}
-                  className={`flex-1 h-full text-xs rounded-none ${rightPanelTab === tab ? "bg-strudel-surface-light" : ""}`}
+                  className={`flex-1 h-full font-display text-xs rounded-none transition-colors ${
+                    rightPanelTab === tab ? "bg-strudel-surface-light text-strudel-accent" : "text-muted-foreground hover:text-white"
+                  }`}
                 >
                   {tab === "samples"
-                    ? "SAMPLES"
+                    ? "Samples"
                     : tab === "media"
-                      ? "MEDIA"
+                      ? "Media"
                       : tab === "console"
-                        ? "CONSOLE"
+                        ? "Console"
                         : tab === "midi"
                           ? "MIDI"
-                          : "SESSION"}
+                          : "Session"}
                 </button>
               ))}
             </div>
@@ -550,18 +578,18 @@ export default function Studio() {
             {midiConnected ? `● MIDI ${midiDeviceCount}/${midiDevices.length}` : '○ MIDI'}
           </span>
           <span className="ml-auto">
-            {initError ? <span className="text-red-500">● INIT ERROR: {initError}</span> :
-             initialized ? '● AUDIO READY' : '◌ INITIALIZING...'}
+            {initError ? <span className="text-red-500">● Init error: {initError}</span> :
+             initialized ? <span className="text-strudel-accent">● Audio ready</span> : '◌ Initializing…'}
           </span>
           {recording && (
-            <span className="text-red-500 animate-pulse">● REC {formatDuration(recordingTime)}</span>
+            <span className="text-red-500 animate-pulse">● Rec {formatDuration(recordingTime)}</span>
           )}
         </div>
       )}
       {focusMode && (
         <button
           onClick={handleToggleFocus}
-          className="fixed top-2 right-2 z-50 bg-strudel-primary text-white text-xs px-3 py-1 rounded hover:bg-strudel-secondary"
+          className="fixed top-2 right-2 z-50 bg-strudel-primary text-black text-xs px-3 py-1 rounded hover:bg-strudel-secondary"
         >
           EXIT FOCUS (Ctrl+F)
         </button>

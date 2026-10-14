@@ -31,7 +31,7 @@ export default function RowInspector({
   if (!isGridRow(row)) {
     return (
       <div className="px-2 py-2 space-y-1">
-        <div className="text-[10px] text-yellow-400 font-bold uppercase">Code-only row (locked)</div>
+        <div className="text-[10px] text-yellow-400 font-bold">Code-only row (locked)</div>
         <pre className="text-[9px] text-muted-foreground font-mono whitespace-pre-wrap max-h-24 overflow-auto bg-strudel-dark rounded p-1">
           {row.code}
         </pre>
@@ -48,7 +48,7 @@ export default function RowInspector({
     <div className="px-2 py-2 space-y-2" data-testid="row-inspector">
       <div className="flex items-center gap-2">
         <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: row.color }} />
-        <span className="text-[10px] text-strudel-accent font-bold uppercase">
+        <span className="text-[10px] text-strudel-accent font-bold">
           {row.kind === 'note' ? 'Note row' : 'Drum row'}
         </span>
       </div>
@@ -82,7 +82,7 @@ export default function RowInspector({
       </div>
 
       <div className="space-y-1">
-        <div className="text-[9px] text-muted-foreground uppercase font-bold">Effects</div>
+        <div className="text-[9px] text-muted-foreground font-bold">Effects</div>
         {row.effects.map((effect: VisualEffect, i: number) => {
           const def = getModifierDef(effect.name);
           const min = def?.defaultMin ?? 0;

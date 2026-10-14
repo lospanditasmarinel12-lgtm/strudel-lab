@@ -29,8 +29,8 @@ export default memo(function Sidebar({
       <div className="px-3 py-3 border-b border-strudel-surface-light">
         <div className="flex items-center gap-2">
           <Music size={18} className="text-strudel-primary" />
-          <span className="text-sm font-bold tracking-wider text-strudel-primary">
-            STRUDEL LIVE
+          <span className="font-display text-base font-semibold tracking-wide text-strudel-primary">
+            Strudel Lab
           </span>
         </div>
       </div>
@@ -43,17 +43,17 @@ export default memo(function Sidebar({
         <TabsList className="w-full rounded-none border-b border-strudel-surface-light bg-strudel-surface p-0 h-8">
           <TabsTrigger
             value="projects"
-            className="flex-1 rounded-none data-[state=active]:bg-strudel-surface-light h-full text-[10px] gap-1"
+            className="flex-1 rounded-none data-[state=active]:bg-strudel-surface-light h-full font-display text-xs gap-1"
           >
             <FolderOpen size={12} />
-            PROJECTS
+            Projects
           </TabsTrigger>
           <TabsTrigger
             value="recordings"
-            className="flex-1 rounded-none data-[state=active]:bg-strudel-surface-light h-full text-[10px] gap-1"
+            className="flex-1 rounded-none data-[state=active]:bg-strudel-surface-light h-full font-display text-xs gap-1"
           >
             <Disc3 size={12} />
-            RECS
+            Recordings
           </TabsTrigger>
         </TabsList>
         <div className="flex-1 overflow-hidden">

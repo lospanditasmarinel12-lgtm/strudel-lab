@@ -27,7 +27,7 @@ export default function BlockGridPopover({ row, onChange }: BlockGridPopoverProp
   return (
     <div className="w-[540px] max-w-[85vw] bg-strudel-surface border border-strudel-surface-light rounded" data-testid="block-grid-popover">
       <div className="flex items-center gap-1 px-2 py-1 border-b border-strudel-surface-light text-[9px] text-muted-foreground">
-        <span className="uppercase">Steps</span>
+        <span>Steps</span>
         {STEPS_OPTIONS.map((n) => (
           <button
             key={n}
@@ -35,7 +35,7 @@ export default function BlockGridPopover({ row, onChange }: BlockGridPopoverProp
             data-testid={`steps-${n}`}
             onClick={() => onChange({ ...row, steps: resizeSteps(row.steps, n) })}
             className={`px-1.5 py-0.5 rounded border border-strudel-surface-light ${
-              row.steps.length === n ? 'bg-strudel-accent text-white' : 'hover:text-white'
+              row.steps.length === n ? 'bg-strudel-accent text-black' : 'hover:text-white'
             }`}
           >
             {n}

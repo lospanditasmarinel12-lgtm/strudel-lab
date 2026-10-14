@@ -61,14 +61,14 @@ export default function MicPanel({ onMicSampleCreated }: MicPanelProps) {
 
   return (
     <div className="p-3 space-y-3 text-xs">
-      <h3 className="text-sm font-bold text-strudel-accent">MICROPHONE INPUT</h3>
+      <h3 className="text-sm font-bold text-strudel-accent">Microphone input</h3>
 
       <Button
         onClick={handleToggleMic}
         className={`w-full h-8 text-xs ${micActive ? 'bg-red-500 hover:bg-red-600' : 'bg-strudel-primary hover:bg-strudel-secondary'}`}
       >
         {micActive ? <MicOff size={14} className="mr-1" /> : <Mic size={14} className="mr-1" />}
-        {micActive ? 'STOP MIC' : 'START MIC'}
+        {micActive ? 'Stop mic' : 'Start mic'}
       </Button>
 
       {micActive && (
@@ -100,7 +100,7 @@ export default function MicPanel({ onMicSampleCreated }: MicPanelProps) {
             className="w-full h-7 text-xs bg-yellow-600 hover:bg-yellow-700"
           >
             <Snowflake size={12} className="mr-1" />
-            {freezing ? 'FREEZING...' : 'FREEZE AS SAMPLE'}
+            {freezing ? 'Freezing…' : 'Freeze as sample'}
           </Button>
         </>
       )}

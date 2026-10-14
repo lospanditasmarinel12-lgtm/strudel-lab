@@ -44,31 +44,31 @@ describe('MicPanel', function() {
     vi.clearAllMocks();
   });
 
-  it('renders START MIC button', function() {
+  it('renders Start mic button', function() {
     render(<MicPanel />);
-    expect(screen.getByText('START MIC')).toBeTruthy();
+    expect(screen.getByText('Start mic')).toBeTruthy();
   });
 
-  it('calls globalMicCapture.start when START MIC is clicked', async function() {
+  it('calls globalMicCapture.start when Start mic is clicked', async function() {
     const user = userEvent.setup();
     render(<MicPanel />);
-    await user.click(screen.getByText('START MIC'));
+    await user.click(screen.getByText('Start mic'));
     expect(globalMicCapture.start).toHaveBeenCalled();
   });
 
-  it('shows STOP MIC and freeze controls after starting', async function() {
+  it('shows Stop mic and freeze controls after starting', async function() {
     const user = userEvent.setup();
     render(<MicPanel />);
-    await user.click(screen.getByText('START MIC'));
-    expect(screen.getByText('STOP MIC')).toBeTruthy();
-    expect(screen.getByText('FREEZE AS SAMPLE')).toBeTruthy();
+    await user.click(screen.getByText('Start mic'));
+    expect(screen.getByText('Stop mic')).toBeTruthy();
+    expect(screen.getByText('Freeze as sample')).toBeTruthy();
   });
 
-  it('calls globalMicCapture.stop when STOP MIC is clicked', async function() {
+  it('calls globalMicCapture.stop when Stop mic is clicked', async function() {
     const user = userEvent.setup();
     render(<MicPanel />);
-    await user.click(screen.getByText('START MIC'));
-    await user.click(screen.getByText('STOP MIC'));
+    await user.click(screen.getByText('Start mic'));
+    await user.click(screen.getByText('Stop mic'));
     expect(globalMicCapture.stop).toHaveBeenCalled();
   });
 
@@ -82,7 +82,7 @@ describe('MicPanel', function() {
     (globalMicCapture.start as any).mockRejectedValueOnce(new Error('permission denied'));
     const user = userEvent.setup();
     render(<MicPanel />);
-    await user.click(screen.getByText('START MIC'));
+    await user.click(screen.getByText('Start mic'));
     expect(await screen.findByText('permission denied')).toBeTruthy();
   });
 });

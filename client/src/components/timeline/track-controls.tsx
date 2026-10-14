@@ -43,12 +43,12 @@ export default function TrackControls({ tracks, code, onCodeChange }: TrackContr
       <div className="flex items-center justify-between px-2 py-1 border-b border-strudel-surface-light">
         <div className="flex items-center gap-1.5">
           <Sliders className="w-3 h-3 text-muted-foreground" />
-          <span className="text-[9px] text-muted-foreground font-bold uppercase">Track Controls</span>
+          <span className="text-[9px] text-muted-foreground font-bold">Track Controls</span>
           <span className="text-[8px] text-muted-foreground">({filteredTracks.length} tracks)</span>
         </div>
         <button
           onClick={() => setCompactMode(c => !c)}
-          className="text-[8px] text-muted-foreground hover:text-white transition-colors uppercase"
+          className="text-[8px] text-muted-foreground hover:text-white transition-colors"
         >
           {compactMode ? 'Show All' : 'Compact'}
         </button>

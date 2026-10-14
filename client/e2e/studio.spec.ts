@@ -11,7 +11,7 @@ test.describe('Studio page E2E', () => {
 
   test('loads the studio page with editor and controls', async ({ page }) => {
     await expect(page.locator('.monaco-editor')).toBeVisible();
-    await expect(page.locator('text=PROJECTS').first()).toBeVisible();
+    await expect(page.locator('text=Projects').first()).toBeVisible();
   });
 
   test('play button toggles playback state', async ({ page }) => {
@@ -36,12 +36,12 @@ test.describe('Studio page E2E', () => {
     await dawBtn.click();
     // After hiding, the timeline should be gone or hidden
     // We just verify it doesn't crash
-    await expect(page.locator('text=SAMPLES').first()).toBeVisible();
+    await expect(page.locator('text=Samples').first()).toBeVisible();
   });
 
   test('sidebar panels are accessible', async ({ page }) => {
-    await expect(page.locator('text=CONSOLE').first()).toBeVisible();
-    await expect(page.locator('text=SAMPLES').first()).toBeVisible();
+    await expect(page.locator('text=Console').first()).toBeVisible();
+    await expect(page.locator('text=Samples').first()).toBeVisible();
     await expect(page.locator('text=MEDIA').first()).toBeVisible();
   });
 });
@@ -117,7 +117,7 @@ test.describe('Project CRUD E2E', () => {
 
   test('create a new project', async ({ page }) => {
     // Click on projects sidebar tab
-    const projectsTab = page.locator('text=PROJECTS').first();
+    const projectsTab = page.locator('text=Projects').first();
     await projectsTab.waitFor({ state: 'visible', timeout: 5000 });
     await projectsTab.click({ force: true });
     await page.waitForTimeout(300);

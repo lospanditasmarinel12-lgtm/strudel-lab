@@ -177,7 +177,7 @@ export default function DirtSamplesBrowser({ search, onInsertSample }: DirtSampl
       <div className="flex gap-1 p-1 border-b border-strudel-surface-light flex-wrap">
         <button
           onClick={() => setCategoryFilter(null)}
-          className={`text-[10px] px-2 py-0.5 rounded ${!categoryFilter ? 'bg-strudel-primary text-white' : 'text-muted-foreground hover:text-white'}`}
+          className={`text-[10px] px-2 py-0.5 rounded ${!categoryFilter ? 'bg-strudel-primary text-black' : 'text-muted-foreground hover:text-white'}`}
         >
           ALL ({allBanks.length})
         </button>

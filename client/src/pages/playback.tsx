@@ -283,7 +283,7 @@ export default function Playback() {
               variant="ghost"
               size="sm"
               onClick={() => setMode("code")}
-              className={`text-xs h-6 px-2 ${codeMode ? "bg-strudel-primary text-white" : "text-muted-foreground hover:text-white"}`}
+              className={`text-xs h-6 px-2 ${codeMode ? "bg-strudel-primary text-black" : "text-muted-foreground hover:text-white"}`}
             >
               <FileCode size={12} className="mr-1" /> CODE
             </Button>
@@ -291,7 +291,7 @@ export default function Playback() {
               variant="ghost"
               size="sm"
               onClick={() => setMode("audio")}
-              className={`text-xs h-6 px-2 ${!codeMode ? "bg-strudel-primary text-white" : "text-muted-foreground hover:text-white"}`}
+              className={`text-xs h-6 px-2 ${!codeMode ? "bg-strudel-primary text-black" : "text-muted-foreground hover:text-white"}`}
             >
               <Music size={12} className="mr-1" /> AUDIO
             </Button>
@@ -366,7 +366,7 @@ export default function Playback() {
                   }}
                   className={`text-xs h-7 px-2 ${
                     playbackSpeed === speed
-                      ? "bg-strudel-primary text-white"
+                      ? "bg-strudel-primary text-black"
                       : "text-muted-foreground hover:text-white"
                   }`}
                 >
@@ -379,7 +379,7 @@ export default function Playback() {
             variant="ghost"
             size="sm"
             onClick={handleToggleLoop}
-            className={`text-xs h-7 px-2 ${looping ? "bg-strudel-accent text-white" : "text-muted-foreground hover:text-white"}`}
+            className={`text-xs h-7 px-2 ${looping ? "bg-strudel-accent text-black" : "text-muted-foreground hover:text-white"}`}
           >
             {looping ? "LOOP ON" : "LOOP OFF"}
           </Button>

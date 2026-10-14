@@ -244,7 +244,7 @@ export default memo(function SessionPanel({
 
       {/* Code preview */}
       <div className="h-[80px] overflow-hidden border-b border-strudel-surface-light">
-        <div className="px-2 py-0.5 text-[9px] font-bold text-muted-foreground/60 uppercase">
+        <div className="px-2 py-0.5 text-[9px] font-bold text-muted-foreground/60">
           Code at {formatTime(currentTime)}
         </div>
         <ScrollArea className="h-full px-2 pb-2">
