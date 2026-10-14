@@ -18,3 +18,11 @@ extraResources/yt-dlp.exe
 # Markdown docs (planning/design/reports) — keep the project README
 *.md
 !README.md
+
+# Agent / opencode tooling (kept local, not tracked)
+.agents/
+.opencode/
+.claude/
+skills-lock.json
+opencode.json
+opencode.jsonc
