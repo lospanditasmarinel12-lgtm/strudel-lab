@@ -1,41 +1,55 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 const STUDIO_URL = 'http://localhost:5000';
 
+/** Wait for the studio to mount in its default (Blocks) mode. */
+async function waitForStudio(page: Page) {
+  // Keep the guided tour out of the way for these feature tests.
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem('strudel_tour_v1', JSON.stringify({ done: true, step: 0 }));
+      localStorage.setItem('strudel_checklist_v1', JSON.stringify({ completed: [], dismissed: true }));
+    } catch {
+      /* ignore */
+    }
+  });
+  await page.goto(STUDIO_URL);
+  await page.waitForFunction(() => !!(window as any).__strudelTest, null, { timeout: 30000 });
+  await expect(page.getByTestId('blockly-workspace')).toBeVisible({ timeout: 30000 });
+}
+
 test.describe('Studio page E2E', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(STUDIO_URL);
-    // Wait for the app to mount
-    await page.waitForSelector('.monaco-editor', { timeout: 10000 });
+    await waitForStudio(page);
   });
 
-  test('loads the studio page with editor and controls', async ({ page }) => {
-    await expect(page.locator('.monaco-editor')).toBeVisible();
+  test('loads the studio with the block editor and controls', async ({ page }) => {
+    await expect(page.getByTestId('blockly-workspace')).toBeVisible();
     await expect(page.locator('text=Projects').first()).toBeVisible();
+    // First launch auto-creates a project so the user can record/save/export.
+    await expect(page.getByText('Untitled').first()).toBeVisible({ timeout: 10000 });
   });
 
   test('play button toggles playback state', async ({ page }) => {
     const playBtn = page.locator('button[title*="Play"]').first();
     await playBtn.click();
-    // Monaco editor should still be visible
-    await expect(page.locator('.monaco-editor')).toBeVisible();
+    await expect(page.getByTestId('blockly-workspace')).toBeVisible();
   });
 
-  test('typing code and evaluating does not crash', async ({ page }) => {
+  test('switching to code and evaluating does not crash', async ({ page }) => {
+    await page.getByTestId('code-toggle').click();
     const editor = page.locator('.monaco-editor');
+    await expect(editor).toBeVisible({ timeout: 15000 });
     await editor.click();
     await page.keyboard.press('Control+Enter');
-    // Should be no Redbox / error boundary
     await expect(page.locator('text=Something went wrong')).toHaveCount(0);
   });
 
   test('DAW timeline toggle shows and hides', async ({ page }) => {
-    const dawBtn = page.locator('button:has-text("DAW")').first();
+    const dawBtn = page.locator('button:has-text("Timeline")').first();
     await dawBtn.click();
     await expect(page.locator('text=TIMELINE').first()).toBeVisible();
     await dawBtn.click();
-    // After hiding, the timeline should be gone or hidden
-    // We just verify it doesn't crash
     await expect(page.locator('text=Samples').first()).toBeVisible();
   });
 
@@ -48,9 +62,7 @@ test.describe('Studio page E2E', () => {
 
 test.describe('Session panel E2E', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(STUDIO_URL);
-    await page.waitForSelector('.monaco-editor', { timeout: 10000 });
-    // Click on the SESSION tab
+    await waitForStudio(page);
     await page.locator('button:has-text("SESSION")').click();
   });
 
@@ -58,10 +70,8 @@ test.describe('Session panel E2E', () => {
     const recordBtn = page.locator('button[title*="Record"]').first();
     if (await recordBtn.isVisible()) {
       await recordBtn.click();
-      // Recording state - verify indicator appears
       await page.waitForTimeout(500);
       await expect(page.locator('text=REC').first()).toBeVisible();
-      // Stop recording
       await recordBtn.click();
     }
   });
@@ -69,16 +79,13 @@ test.describe('Session panel E2E', () => {
 
 test.describe('Track Controls E2E', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(STUDIO_URL);
-    await page.waitForSelector('.monaco-editor', { timeout: 10000 });
-    // Enable DAW timeline
-    const dawBtn = page.locator('button:has-text("DAW")').first();
+    await waitForStudio(page);
+    const dawBtn = page.locator('button:has-text("Timeline")').first();
     await dawBtn.click();
     await expect(page.locator('text=TIMELINE').first()).toBeVisible();
   });
 
   test('track controls shows Track Controls header when tracks have modifiers', async ({ page }) => {
-    // The default code includes gain/lpf/room modifiers
     const header = page.locator('text=Track Controls');
     if (await header.isVisible()) {
       await expect(header).toBeVisible();
@@ -88,13 +95,10 @@ test.describe('Track Controls E2E', () => {
 
 test.describe('Keyboard shortcuts', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(STUDIO_URL);
-    await page.waitForSelector('.monaco-editor', { timeout: 10000 });
+    await waitForStudio(page);
   });
 
   test('Ctrl+Enter evaluates code without crash', async ({ page }) => {
-    const editor = page.locator('.monaco-editor');
-    await editor.click();
     await page.keyboard.press('Control+Enter');
     await page.waitForTimeout(500);
     await expect(page.locator('text=Something went wrong')).toHaveCount(0);
@@ -103,32 +107,27 @@ test.describe('Keyboard shortcuts', () => {
   test('Ctrl+F toggles focus mode', async ({ page }) => {
     await page.keyboard.press('Control+f');
     await page.waitForTimeout(300);
-    const exitBtn = page.locator('button:has-text("EXIT FOCUS")');
-    // Focus mode may or may not be supported - just check no crash
-    await expect(page.locator('.monaco-editor')).toBeVisible();
+    // Focus mode hides chrome but keeps the editor; just ensure no crash.
+    await expect(page.locator('text=Something went wrong')).toHaveCount(0);
   });
 });
 
 test.describe('Project CRUD E2E', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(STUDIO_URL);
-    await page.waitForSelector('.monaco-editor', { timeout: 10000 });
+    await waitForStudio(page);
   });
 
   test('create a new project', async ({ page }) => {
-    // Click on projects sidebar tab
     const projectsTab = page.locator('text=Projects').first();
     await projectsTab.waitFor({ state: 'visible', timeout: 5000 });
     await projectsTab.click({ force: true });
     await page.waitForTimeout(300);
 
-    // Try to find a create project button or input
     const createBtn = page.locator('button:has-text("New")').first();
     if (await createBtn.isVisible()) {
       await createBtn.click();
       await page.waitForTimeout(300);
     }
-    // The app should still be stable
-    await expect(page.locator('.monaco-editor')).toBeVisible();
+    await expect(page.getByTestId('blockly-workspace')).toBeVisible();
   });
 });

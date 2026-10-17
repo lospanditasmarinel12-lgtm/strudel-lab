@@ -1,0 +1,37 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "packageManager": "npm",
+  "testRunner": "vitest",
+  "disableTypeChecks": false,
+  "vitest": {
+    "configFile": "vitest.config.ts"
+  },
+  "mutate": [
+    "client/src/lib/diff.ts",
+    "client/src/lib/wav-encoder.ts",
+    "client/src/lib/code-session-player.ts",
+    "client/src/lib/timeline-parser.ts",
+    "client/src/lib/session-exporter.ts",
+    "client/src/lib/blockly/ast-to-blocks.ts",
+    "client/src/lib/blockly/strudel-generator.ts",
+    "client/src/lib/blockly/registry.ts",
+    "client/src/lib/blockly/workspace-sync.ts",
+    "!client/src/lib/**/*.test.ts"
+  ],
+  "testFiles": ["client/src/**/*.test.{ts,tsx}"],
+  "reporters": ["clear-text", "progress", "json", "html"],
+  "jsonReporter": {
+    "fileName": "reports/mutation/mutation.json"
+  },
+  "htmlReporter": {
+    "fileName": "reports/mutation/index.html"
+  },
+  "coverageAnalysis": "perTest",
+  "concurrency": 2,
+  "timeoutMS": 30000,
+  "thresholds": {
+    "high": 80,
+    "low": 60,
+    "break": 40
+  }
+}

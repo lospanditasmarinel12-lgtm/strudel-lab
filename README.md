@@ -11,8 +11,10 @@ A desktop + web environment for live-coding algorithmic music with the [Strudel]
 ## What is it?
 
 Strudel is a pattern language for live coding music. This studio wraps it in a
-full-featured workspace: a Monaco editor, a sample browser, a timeline, session
-recording/replay, and export/import of songs and live sets.
+full-featured workspace: a **Blocks** visual editor (Blockly) with a text
+**Code** editor (Monaco), a sample browser, a timeline, session recording/replay,
+and export/import of songs and live sets. Both editors write the same pattern —
+the code string is the single source of truth.
 
 Everything runs locally. There is **no backend server**: audio is produced with
 the Web Audio API via `@strudel/web`, and all projects, recordings, and settings
@@ -39,13 +41,28 @@ are persisted in the browser's IndexedDB (Dexie).
 - YouTube audio import in the desktop build (via a bundled `yt-dlp`).
 
 ### Interface
-- Monaco editor with Strudel snippets/completions.
-- Visual feedback: waveform display, pattern visualizer, step grid, code blocks.
-- Timeline with track controls and scrubbable playhead.
+- **Blocks** editor (Blockly) as the default, with a one-click **Code** toggle
+  (Monaco with Strudel snippets/completions). Both edit the same pattern.
+- Timeline with track controls and a scrubbable playhead.
 - Panels: Samples, Media/Mic, Console, MIDI, Session.
 - MIDI input support with note mapping.
 - Microphone capture to create samples.
 - Projects + recordings sidebar, auto-save, focus mode, status bar (BPM, latency, FPS).
+
+### Onboarding & help
+- **Guided tour** on first launch: action-gated steps that walk through building
+  a pattern, playing it, adding samples, recording, and exporting. Skippable,
+  replayable, and persisted.
+- **Get started** checklist that checks itself off as you explore.
+- **Examples** dialog with starter patterns you can load as projects.
+- **Help** menu: replay the tour, examples, keyboard shortcuts, and docs.
+
+### Projects & exit safety
+- On first launch a project ("Untitled") is created automatically so you can
+  record, save, and export immediately.
+- Closing with unsaved changes prompts to **Save**, **Export Song**,
+  **Export Live Set**, or **Exit & Delete** (a custom dialog in the desktop
+  build; a native prompt in the browser).
 
 ## Getting started
 
@@ -110,10 +127,14 @@ mentioned these, but they were never part of this codebase.
 
 ### Key modules
 - `client/src/lib/strudel-engine.ts` — init, evaluate, master gain, latency.
+- `client/src/lib/blockly/*` — bidirectional `code ⇄ blocks` bridge (acorn AST ↔ Blockly).
 - `client/src/lib/recorder.ts` — session recording state machine + diff snapshots.
 - `client/src/lib/timeline-parser.ts` — entity/track parsing, snapshot resolution.
 - `client/src/lib/session-exporter.ts` — Song / Live Set export & import.
 - `client/src/lib/sample-registry.ts` — bank discovery, custom sample registry.
+- `client/src/lib/tour/*` + `client/src/hooks/use-tour.ts` — guided-tour engine.
+- `client/src/hooks/use-exit-guard.ts` — unsaved-changes exit interception.
+- `client/src/lib/examples.ts` — starter patterns.
 - `client/src/lib/stores/*` — Dexie schema and project/session stores.
 - `shared/schema.ts` — shared types and track categories.
 
@@ -125,6 +146,7 @@ npm run lint          # eslint
 npm test              # vitest unit tests
 npm run test:coverage # unit tests + coverage report
 npm run test:e2e      # playwright (starts the dev server)
+npm run test:mutation # Stryker mutation testing (client/src/lib/**)
 npm run format        # prettier --write
 npm run check         # typecheck + lint + test
 ```
@@ -133,6 +155,19 @@ npm run check         # typecheck + lint + test
 - YouTube import requires the Electron build and a `yt-dlp` binary
   (`scripts/download-yt-dlp.mjs` fetches it; it is not committed).
 - Freesound search requires your own API key (entered in-app, stored in local storage).
+
+## Changelog
+
+### 3.0.0
+- **Added** — Blockly **Blocks** editor with lossless two-way code sync; it is now the default editor.
+- **Added** — first-run guided tour, get-started checklist, starter Examples, and a Help menu.
+- **Added** — unsaved-changes exit guard: Save / Export Song / Export Live Set / Exit & Delete.
+- **Added** — auto-created "Untitled" project on first launch.
+- **Added** — deep test suite (property-based + model-based + corpus), coverage thresholds, and Stryker mutation testing.
+- **Added** — OS-keychain storage for the Freesound API key.
+- **Changed** — Blocks is the default editor; Code remains one click away.
+- **Removed** — structure canvas, step grid, legacy inline block layer, and pattern visualizer (superseded by Blocks).
+- **Fixed** — `parseEntities` cache aliasing, Song metadata `0` handling, and recorder commit fidelity.
 
 ## Credits
 

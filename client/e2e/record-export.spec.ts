@@ -32,15 +32,43 @@ async function openLatestSession(page: Page) {
 }
 
 test.describe('record → export → replay', () => {
+  test('rejects a malformed live-set import without crashing', async ({ page }) => {
+    page.on('dialog', (dialog) => dialog.accept());
+    await page.goto('/#/playback/does-not-exist');
+    await expect(page.locator('text=Session not found')).toBeVisible({ timeout: 15000 });
+
+    const [chooser] = await Promise.all([
+      page.waitForEvent('filechooser'),
+      page.getByRole('button', { name: /IMPORT LIVE SET/i }).click(),
+    ]);
+    await chooser.setFiles({
+      name: 'bad.strudel.live.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from('{ not valid json'),
+    });
+
+    // Still on the not-found view; no unhandled crash / error boundary.
+    await expect(page.locator('text=Session not found')).toBeVisible();
+    await expect(page.locator('text=Something went wrong')).toHaveCount(0);
+  });
+
   test('simulates live coding, exports song + live set, and replays', async ({ page }, testInfo) => {
     test.setTimeout(SIM_SECONDS * 1000 + 90_000);
 
     const pageErrors: string[] = [];
     page.on('pageerror', (err) => pageErrors.push(err.message));
 
+    await page.addInitScript(() => {
+      try {
+        localStorage.setItem('strudel_tour_v1', JSON.stringify({ done: true, step: 0 }));
+        localStorage.setItem('strudel_checklist_v1', JSON.stringify({ completed: [], dismissed: true }));
+      } catch {
+        /* ignore */
+      }
+    });
     await page.goto('/');
-    await page.waitForSelector('.monaco-editor', { timeout: 20000 });
-    await page.waitForFunction(() => !!(window as any).__strudelTest, null, { timeout: 10000 });
+    await page.waitForFunction(() => !!(window as any).__strudelTest, null, { timeout: 30000 });
+    await expect(page.getByTestId('blockly-workspace')).toBeVisible({ timeout: 30000 });
 
     // 1. Create a project so the recording can be saved.
     await page.getByTestId('new-project').click();
@@ -50,9 +78,9 @@ test.describe('record → export → replay', () => {
 
     // 2. Start recording.
     const recordBtn = page.getByTestId('record-button');
-    await expect(recordBtn).toHaveAttribute('title', 'Start Recording');
+    await expect(recordBtn).toHaveAttribute('title', 'Start recording');
     await recordBtn.click();
-    await expect(recordBtn).toHaveAttribute('title', 'Stop Recording');
+    await expect(recordBtn).toHaveAttribute('title', 'Stop recording');
     expect(await page.evaluate(() => (window as any).__strudelTest?.isRecording())).toBe(true);
 
     // 3. Simulate a person coding: change code, pause long enough for the
@@ -80,12 +108,12 @@ test.describe('record → export → replay', () => {
 
     // 5. Stop recording and wait for the session to be persisted.
     await recordBtn.click();
-    await expect(recordBtn).toHaveAttribute('title', 'Start Recording', { timeout: 15000 });
+    await expect(recordBtn).toHaveAttribute('title', 'Start recording', { timeout: 15000 });
     await page.waitForTimeout(2000);
 
     // 6. Reload so the freshly saved session is read from IndexedDB, then load it.
     await page.reload();
-    await page.waitForSelector('.monaco-editor', { timeout: 20000 });
+    await page.waitForFunction(() => !!(window as any).__strudelTest, null, { timeout: 30000 });
     await openLatestSession(page);
 
     // 7. Export the finished Song.

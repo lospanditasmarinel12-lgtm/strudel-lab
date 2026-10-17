@@ -47,6 +47,16 @@ This project is built on the Strudel live-coding language and libraries
 The @strudel/* packages and superdough are licensed AGPL-3.0-or-later.
 
 --------------------------------------------------------------------------------
+BLOCKLY
+--------------------------------------------------------------------------------
+The visual block editor is built on Blockly
+  https://github.com/RaspberryPiFoundation/blockly
+  Copyright 2013 Google LLC — Apache License 2.0
+
+The Zelos renderer, custom block definitions, theme and the Strudel code
+generator are original to this project but link against Blockly.
+
+--------------------------------------------------------------------------------
 THIRD-PARTY DEPENDENCIES
 --------------------------------------------------------------------------------
 Bundled third-party dependency notices and license texts are listed in

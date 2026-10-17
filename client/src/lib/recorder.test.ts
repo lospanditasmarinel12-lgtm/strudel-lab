@@ -192,11 +192,14 @@ describe('SessionRecorder', () => {
       expect(recorder['snapshots'].length).toBe(1);
     });
 
-    it('handles entity removal gracefully', function() {
+    it('prunes trackers for removed entities (no stale resurrection)', function() {
       recorder.startRecording('p1', 120, 'a\n\nb');
       vi.mocked(parseEntities).mockReturnValue([makeEntity('e0', ['a'])]);
       recorder.handleCodeChange('a');
-      expect(recorder['entities'].has('e1')).toBe(true);
+      expect(recorder['entities'].has('e0')).toBe(true);
+      expect(recorder['entities'].has('e1')).toBe(false);
+      // History for the removed entity is preserved in the snapshot log.
+      expect(recorder.getSnapshots().some(s => s.entityId === 'e1')).toBe(true);
     });
   });
 
@@ -348,6 +351,61 @@ describe('SessionRecorder', () => {
       for (let i = 1; i < snaps.length; i++) {
         expect(snaps[i].timestamp).toBeGreaterThanOrEqual(snaps[i - 1].timestamp);
       }
+    });
+  });
+
+  describe('commit fidelity', function() {
+    it('commits the latest editor code and never resurrects a deleted section', function() {
+      recorder.startRecording('p1', 120, 'A\n\nB');
+      vi.mocked(parseEntities).mockReturnValue([makeEntity('e0', ['A2']), makeEntity('e1', ['B'])]);
+      recorder.handleCodeChange('A2\n\nB');
+      vi.mocked(parseEntities).mockReturnValue([makeEntity('e0', ['A2'])]);
+      recorder.handleCodeChange('A2');
+      recorder.commitAllEntities();
+
+      const snaps = recorder.getSnapshots();
+      const last = snaps[snaps.length - 1];
+      expect(last.code).toBe('A2');
+      expect(last.code).not.toContain('B');
+    });
+
+    it('finalCode after stop is the last editor code, not a reconstruction', function() {
+      recorder.startRecording('p1', 120, 'A\n\nB');
+      vi.mocked(parseEntities).mockReturnValue([makeEntity('e0', ['A2'])]);
+      recorder.handleCodeChange('A2');
+      const result = recorder.stopRecording();
+      expect(result.finalCode).toBe('A2');
+    });
+
+    it('commits the exact editor code, not a normalized entity join', function() {
+      // Two sections separated by a single newline: reconstructing from entities
+      // would normalize the separator to a blank line and diverge from the editor.
+      vi.mocked(parseEntities).mockReturnValue([
+        makeEntity('e0', ['$: s("bd")']),
+        makeEntity('e1', ['$: s("hh")']),
+      ]);
+      recorder.startRecording('p1', 120, '$: s("bd")\n$: s("hh")');
+
+      vi.mocked(parseEntities).mockReturnValue([
+        makeEntity('e0', ['$: s("bd bd")']),
+        makeEntity('e1', ['$: s("hh")']),
+      ]);
+      const editorCode = '$: s("bd bd")\n$: s("hh")';
+      recorder.handleCodeChange(editorCode);
+      recorder.commitAllEntities();
+
+      const snaps = recorder.getSnapshots();
+      expect(snaps[snaps.length - 1].code).toBe(editorCode);
+    });
+
+    it('clears a pending debounce timer on commit (no late duplicate)', function() {
+      recorder.startRecording('p1', 120, 'a');
+      vi.mocked(parseEntities).mockReturnValue([makeEntity('e0', ['b'])]);
+      recorder.handleCodeChange('b');
+      recorder.commitAllEntities();
+      const after = recorder.getSnapshots().length;
+      vi.advanceTimersByTime(4000);
+      expect(recorder.getSnapshots().length).toBe(after);
     });
   });
 });

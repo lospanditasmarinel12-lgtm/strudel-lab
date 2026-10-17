@@ -8,6 +8,7 @@ import { getAllSessions, getSessionSnapshots } from "@/lib/stores/session-store"
 import { useCodeSessionPlayer } from "@/hooks/use-code-session-player";
 import SessionTimelinePanel from "@/components/timeline/session-timeline-panel";
 import { resolveSnapshotCodes } from "@/lib/timeline-parser";
+import { emitTourEvent } from "@/lib/tour/events";
 import {
   exportSongAsFile,
   exportLiveSessionAsFile,
@@ -102,11 +103,13 @@ export default memo(function SessionPanel({
   const handleExportSong = useCallback(async () => {
     if (!loadedSession) return;
     await exportSongAsFile(loadedSession, loadedSnapshots);
+    emitTourEvent('exported');
   }, [loadedSession, loadedSnapshots]);
 
   const handleExportLive = useCallback(async () => {
     if (!loadedSession) return;
     await exportLiveSessionAsFile(loadedSession, loadedSnapshots);
+    emitTourEvent('exported');
   }, [loadedSession, loadedSnapshots]);
 
   const handleImportSong = useCallback(async () => {

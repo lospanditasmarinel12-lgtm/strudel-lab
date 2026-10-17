@@ -194,7 +194,7 @@ export async function importCustomSample(name: string, blob: Blob, mime?: string
     sourceType: existing?.sourceType || 'local',
     originalUrl: existing?.originalUrl,
     category: 'custom',
-    createdAt: existing?.createdAt || Date.now(),
+    createdAt: existing?.createdAt ?? Date.now(),
   });
 }
 

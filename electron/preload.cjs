@@ -9,6 +9,12 @@ try {
       return () => ipcRenderer.removeListener('youtube:progress', handler);
     },
     cancelDownload: () => ipcRenderer.invoke('youtube:cancel'),
+    onBeforeClose: (callback) => {
+      const handler = () => callback();
+      ipcRenderer.on('app:before-close', handler);
+      return () => ipcRenderer.removeListener('app:before-close', handler);
+    },
+    confirmClose: () => ipcRenderer.invoke('app:close'),
     secureStore: {
       get: (key) => ipcRenderer.invoke('secure:get', key),
       set: (key, value) => ipcRenderer.invoke('secure:set', key, value),

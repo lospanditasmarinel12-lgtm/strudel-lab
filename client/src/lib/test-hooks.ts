@@ -13,6 +13,8 @@ export interface StrudelTestHooks {
   isRecording(): boolean;
   getSnapshotCount(): number;
   getFinalCode(): string;
+  /** Clear onboarding flags (tour + checklist) for deterministic e2e. */
+  resetTour(): void;
 }
 
 declare global {

@@ -15,9 +15,25 @@ vite.config.ts.*
 extraResources/yt-dlp
 extraResources/yt-dlp.exe
 
-# Markdown docs (planning/design/reports) — keep the project README
+# Blockly runtime media (copied from node_modules by scripts/copy-blockly-media.mjs)
+client/public/blockly-media
+
+# Markdown docs (planning/design/reports) — keep only the project README
 *.md
 !README.md
+
+# Downloaded reference docs (regenerate with scripts/fetch-docs.mjs)
+docs/
+
+# Secrets and editor/OS files
+.env
+.env.*
+.idea/
+.vscode/
+
+# Mutation testing artifacts
+reports
+.stryker-tmp
 
 # Agent / opencode tooling (kept local, not tracked)
 .agents/

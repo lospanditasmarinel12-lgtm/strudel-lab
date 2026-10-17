@@ -44,7 +44,7 @@ vi.mock('lucide-react', function() {
     PanelLeft: function() { return <span>PanelLeftIcon</span>; },
     PanelBottom: function() { return <span>PanelBottomIcon</span>; },
     Blocks: function() { return <span>BlocksIcon</span>; },
-    Grid3x3: function() { return <span>GridIcon</span>; },
+    Code2: function() { return <span>CodeIcon</span>; },
   };
 });
 
@@ -67,12 +67,8 @@ function defaultProps() {
     onToggleLive: vi.fn(),
     showTimeline: false,
     onToggleTimeline: vi.fn(),
-    showVisual: false,
+    showVisual: true,
     onToggleVisual: vi.fn(),
-    showCanvas: false,
-    onToggleCanvas: vi.fn(),
-    showGrid: false,
-    onToggleGrid: vi.fn(),
     focusMode: false,
     onToggleFocus: vi.fn(),
     showSidebar: true,
@@ -127,10 +123,10 @@ describe('TopBar', function() {
     expect(screen.getAllByText('Timeline').length).toBeGreaterThan(0);
   });
 
-  it('shows BLOCKS button and calls onToggleVisual', async function() {
+  it('shows BLOCKS button and calls onToggleVisual from code mode', async function() {
     const onToggleVisual = vi.fn();
     const user = userEvent.setup();
-    render(<TopBar {...defaultProps()} onToggleVisual={onToggleVisual} />);
+    render(<TopBar {...defaultProps()} showVisual={false} onToggleVisual={onToggleVisual} />);
     const btn = screen.getByText('Blocks');
     expect(btn).toBeTruthy();
     await user.click(btn);

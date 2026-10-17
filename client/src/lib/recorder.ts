@@ -113,8 +113,8 @@ export class SessionRecorder {
         entityId: entity.id,
         lastCode: entityCode,
         lastSnapshottedCode: entityCode,
-        lastChangeTime: Date.now(),
-        lastSnapshotTime: Date.now(),
+        lastChangeTime: this.nowMs(),
+        lastSnapshotTime: this.nowMs(),
         timer: null,
       };
       this.entities.set(entity.id, tracker);
@@ -170,7 +170,7 @@ export class SessionRecorder {
     if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
       this.mediaRecorder.pause();
     }
-    this.pauseStartTime = Date.now();
+    this.pauseStartTime = this.nowMs();
   }
 
   resumeRecording(): void {
@@ -188,9 +188,16 @@ export class SessionRecorder {
     const entities = parseEntities(fullCode);
     const currentEntityIds = new Set(entities.map(e => e.id));
 
-    for (const [, tracker] of this.entities) {
-      if (!currentEntityIds.has(tracker.entityId)) {
-        tracker.lastChangeTime = Number.MAX_SAFE_INTEGER;
+    // Prune trackers for entities that no longer exist. Their history is already
+    // in `this.snapshots`; keeping them would let a deleted section resurrect in
+    // later committed snapshots.
+    for (const [id, tracker] of [...this.entities]) {
+      if (!currentEntityIds.has(id)) {
+        if (tracker.timer) {
+          clearTimeout(tracker.timer);
+          tracker.timer = null;
+        }
+        this.entities.delete(id);
       }
     }
 
@@ -203,8 +210,8 @@ export class SessionRecorder {
           entityId: entity.id,
           lastCode: newCode,
           lastSnapshottedCode: newCode,
-          lastChangeTime: Date.now(),
-          lastSnapshotTime: Date.now(),
+          lastChangeTime: this.nowMs(),
+          lastSnapshotTime: this.nowMs(),
           timer: null,
         };
         this.entities.set(entity.id, tracker);
@@ -212,13 +219,13 @@ export class SessionRecorder {
       } else if (existing.lastCode !== newCode) {
         existing.lastCode = newCode;
         if (existing.timer) clearTimeout(existing.timer);
-        existing.lastChangeTime = Date.now();
+        existing.lastChangeTime = this.nowMs();
         existing.timer = setTimeout(() => {
           const t = this.entities.get(entity.id);
-          if (t && Date.now() - t.lastChangeTime >= ENTITY_INACTIVITY_MS) {
+          if (t && this.nowMs() - t.lastChangeTime >= ENTITY_INACTIVITY_MS) {
             this.addSnapshot(entity.id, fullCode, 'edit');
             t.lastSnapshottedCode = t.lastCode;
-            t.lastSnapshotTime = Date.now();
+            t.lastSnapshotTime = this.nowMs();
           }
         }, ENTITY_INACTIVITY_MS);
       }
@@ -242,7 +249,9 @@ export class SessionRecorder {
 
   commitAllEntities(): void {
     if (!this.recording) return;
-    const fullCode = this.getCurrentCode();
+    // Use the latest editor code, not a reconstruction from the entity map, so
+    // committed snapshots can never contain stale/deleted code.
+    const fullCode = this.lastFullCode || this.getCurrentCode();
     for (const [entityId, tracker] of this.entities) {
       if (tracker.timer) {
         clearTimeout(tracker.timer);
@@ -251,7 +260,7 @@ export class SessionRecorder {
       if (tracker.lastCode !== tracker.lastSnapshottedCode) {
         this.addSnapshot(entityId, fullCode, 'edit');
         tracker.lastSnapshottedCode = tracker.lastCode;
-        tracker.lastSnapshotTime = Date.now();
+        tracker.lastSnapshotTime = this.nowMs();
       }
     }
   }
@@ -262,6 +271,11 @@ export class SessionRecorder {
 
   getFinalCode(): string {
     return this.lastFullCode || this.getCurrentCode();
+  }
+
+  /** Single monotonic clock source for all recorder timing (debounce + elapsed). */
+  private nowMs(): number {
+    return performance.now();
   }
 
   getElapsedMs(): number {

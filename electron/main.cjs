@@ -7,6 +7,8 @@ const os = require('os');
 
 let mainWindow;
 let activeDownload = null;
+// Set once the renderer has confirmed it's safe to close (saved/exported/discarded).
+let forceClose = false;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -37,10 +39,24 @@ function createWindow() {
     mainWindow.show();
   });
 
+  // Ask the renderer before closing so it can offer to save/export unsaved work.
+  mainWindow.on('close', (event) => {
+    if (forceClose) return;
+    event.preventDefault();
+    mainWindow.webContents.send('app:before-close');
+  });
+
   mainWindow.on('closed', () => {
     mainWindow = null;
+    forceClose = false;
   });
 }
+
+// Renderer confirms the close (after saving/exporting/deleting or when clean).
+ipcMain.handle('app:close', () => {
+  forceClose = true;
+  mainWindow?.close();
+});
 
 // Resolve paths: dev vs packaged
 const isDev = !app.isPackaged;

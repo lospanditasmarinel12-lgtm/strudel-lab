@@ -470,12 +470,13 @@ interface ModifierRowProps {
 
 function ModifierRow({ name, detail, syntax, onInsert }: ModifierRowProps) {
   return (
-    <div className="flex items-center gap-2 px-2 py-1 hover:bg-strudel-surface-light/50 text-xs">
+    <div data-testid="sample-effect" className="flex items-center gap-2 px-2 py-1 hover:bg-strudel-surface-light/50 text-xs">
       <span className="text-strudel-accent font-mono text-[11px] w-16 shrink-0">{name}</span>
       <span className="flex-1 text-muted-foreground text-[9px] truncate">{detail}</span>
       <span className="text-[8px] text-muted-foreground/40 font-mono hidden sm:block">{syntax}</span>
       <button
         onClick={onInsert}
+        data-testid="effect-insert"
         className="text-muted-foreground hover:text-white p-0.5 hover:bg-strudel-surface-light rounded cursor-pointer"
         title={`Insert ${name}`}
       >
@@ -497,6 +498,7 @@ function SampleRow({ name, onInsert, onPlay, onRemove, showRemove }: SampleRowPr
   return (
     <div
       draggable
+      data-testid="sample-item"
       onDragStart={(e) => {
         e.dataTransfer.setData('application/x-strudel-sample', name);
         e.dataTransfer.setData('text/plain', name);
@@ -516,6 +518,7 @@ function SampleRow({ name, onInsert, onPlay, onRemove, showRemove }: SampleRowPr
       </button>
       <button
         onClick={() => onInsert(name)}
+        data-testid="sample-insert"
         className="text-muted-foreground hover:text-white p-0.5 hover:bg-strudel-surface-light rounded cursor-pointer"
         title={`Insert ${name}`}
       >

@@ -25,9 +25,17 @@ function categorizeSample(name: string): keyof TrackCategory {
 
 const parseEntitiesCache = new Map<string, ParsedEntity[]>();
 
+/**
+ * Clone cached entities so callers can never mutate the shared cache. The
+ * expensive work (parsing) stays cached; only the returned structures are copied.
+ */
+function cloneEntities(entities: ParsedEntity[]): ParsedEntity[] {
+  return entities.map((e) => ({ ...e, codeLines: [...e.codeLines] }));
+}
+
 export function parseEntities(code: string): ParsedEntity[] {
   const cached = parseEntitiesCache.get(code);
-  if (cached) return cached;
+  if (cached) return cloneEntities(cached);
   const entities: ParsedEntity[] = [];
   const lines = code.split('\n');
   let currentEntity: ParsedEntity | null = null;
@@ -71,7 +79,7 @@ export function parseEntities(code: string): ParsedEntity[] {
     const firstKey = parseEntitiesCache.keys().next().value;
     if (firstKey) parseEntitiesCache.delete(firstKey);
   }
-  return entities;
+  return cloneEntities(entities);
 }
 
 function createEntityFromLine(line: string, id: string, lineIndex: number): ParsedEntity {

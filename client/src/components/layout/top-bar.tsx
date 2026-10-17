@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -7,7 +7,7 @@ import {
   DropdownMenuContent,
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
-import { Play, Square, Circle, Pause, Clock, Maximize2, Minimize2, Layout, PanelRight, PanelLeft, PanelBottom, Blocks, Grid3x3 } from "lucide-react";
+import { Play, Square, Circle, Pause, Clock, Maximize2, Minimize2, Layout, PanelRight, PanelLeft, PanelBottom, Blocks, Code2 } from "lucide-react";
 import type { Project } from "@shared/schema";
 
 interface TopBarProps {
@@ -28,10 +28,6 @@ interface TopBarProps {
   onToggleTimeline: () => void;
   showVisual: boolean;
   onToggleVisual: () => void;
-  showCanvas: boolean;
-  onToggleCanvas: () => void;
-  showGrid: boolean;
-  onToggleGrid: () => void;
   focusMode: boolean;
   onToggleFocus: () => void;
   showSidebar: boolean;
@@ -40,6 +36,8 @@ interface TopBarProps {
   onToggleSidebar: () => void;
   onToggleRightPanel: () => void;
   onToggleStatusBar: () => void;
+  /** Optional Help menu (mounted by the studio). */
+  helpSlot?: ReactNode;
 }
 
 /** A scope-style level meter; animates only while playing. */
@@ -80,10 +78,6 @@ export default memo(function TopBar({
   onToggleTimeline,
   showVisual,
   onToggleVisual,
-  showCanvas,
-  onToggleCanvas,
-  showGrid,
-  onToggleGrid,
   focusMode,
   onToggleFocus,
   showSidebar,
@@ -92,6 +86,7 @@ export default memo(function TopBar({
   onToggleSidebar,
   onToggleRightPanel,
   onToggleStatusBar,
+  helpSlot,
 }: TopBarProps) {
   return (
     <div className="border-b border-strudel-surface-light bg-strudel-surface">
@@ -115,6 +110,7 @@ export default memo(function TopBar({
               size="icon"
               onClick={onPlay}
               disabled={!initialized}
+              data-testid="play-button"
               className={`h-7 w-7 ${playing ? 'text-strudel-accent' : 'text-muted-foreground hover:text-white'} disabled:opacity-30`}
               title={initialized ? 'Play (Ctrl+Enter)' : 'Initializing audio…'}
               aria-label="Play"
@@ -151,6 +147,7 @@ export default memo(function TopBar({
             variant="ghost"
             size="sm"
             onClick={onToggleLive}
+            data-testid="live-toggle"
             className={`h-7 px-2 font-display text-xs ${liveMode ? 'bg-strudel-accent text-black' : 'text-muted-foreground hover:text-white'}`}
             title="Live auto-evaluate on code change"
           >
@@ -161,46 +158,45 @@ export default memo(function TopBar({
             variant="ghost"
             size="sm"
             onClick={onToggleTimeline}
+            data-testid="timeline-toggle"
             className={`h-7 px-2 font-display text-xs ${showTimeline ? 'bg-strudel-accent text-black' : 'text-muted-foreground hover:text-white'}`}
             title="Toggle timeline"
           >
             <Clock size={14} className="mr-1" />
             Timeline
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggleGrid}
-            data-testid="grid-toggle"
-            className={`h-7 px-2 font-display text-xs ${showGrid ? 'bg-strudel-accent text-black' : 'text-muted-foreground hover:text-white'}`}
-            title="Toggle the step grid"
+          <div
+            className="flex items-center rounded-md border border-strudel-surface-light overflow-hidden h-7"
+            role="group"
+            aria-label="Editor mode"
           >
-            <Grid3x3 size={14} className="mr-1" />
-            Grid
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggleVisual}
-            data-testid="blocks-toggle"
-            className={`h-7 px-2 font-display text-xs ${showVisual ? 'bg-strudel-accent text-black' : 'text-muted-foreground hover:text-white'}`}
-            title="Toggle draggable code blocks"
-          >
-            <Blocks size={14} className="mr-1" />
-            Blocks
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggleCanvas}
-            data-testid="canvas-toggle"
-            className={`h-7 px-2 font-display text-xs ${showCanvas ? 'bg-strudel-accent text-black' : 'text-muted-foreground hover:text-white'}`}
-            title="Toggle structure canvas"
-          >
-            <Layout size={14} className="mr-1" />
-            Canvas
-          </Button>
-
+            <button
+              type="button"
+              data-testid="code-toggle"
+              onClick={() => showVisual && onToggleVisual()}
+              aria-pressed={!showVisual}
+              className={`flex items-center h-full px-2 font-display text-xs ${
+                !showVisual ? 'bg-strudel-accent text-black' : 'text-muted-foreground hover:text-white'
+              }`}
+              title="Text code editor"
+            >
+              <Code2 size={14} className="mr-1" />
+              Code
+            </button>
+            <button
+              type="button"
+              data-testid="blocks-toggle"
+              onClick={() => !showVisual && onToggleVisual()}
+              aria-pressed={showVisual}
+              className={`flex items-center h-full px-2 font-display text-xs border-l border-strudel-surface-light ${
+                showVisual ? 'bg-strudel-accent text-black' : 'text-muted-foreground hover:text-white'
+              }`}
+              title="Visual block editor (Blockly)"
+            >
+              <Blocks size={14} className="mr-1" />
+              Blocks
+            </button>
+          </div>
           <div className="w-px h-5 bg-strudel-surface-light" />
 
           <DropdownMenu>
@@ -239,6 +235,8 @@ export default memo(function TopBar({
             {focusMode ? <Minimize2 size={14} className="mr-1" /> : <Maximize2 size={14} className="mr-1" />}
             {focusMode ? 'Exit focus' : 'Focus'}
           </Button>
+
+          {helpSlot}
         </div>
 
         <div className="flex items-center gap-3">
@@ -247,6 +245,7 @@ export default memo(function TopBar({
             <Switch
               checked={autoSaveOn}
               onCheckedChange={onToggleAutoSave}
+              data-testid="auto-save-switch"
               className="scale-75 data-[state=checked]:bg-strudel-accent"
               aria-label="Toggle auto-save"
             />

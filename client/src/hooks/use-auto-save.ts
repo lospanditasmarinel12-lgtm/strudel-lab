@@ -2,10 +2,17 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { updateProject } from '@/lib/stores/project-store';
 import type { Project } from '@shared/schema';
 
-export function useAutoSave(project: Project | null, code: string, enabled: boolean) {
+export function useAutoSave(
+  project: Project | null,
+  code: string,
+  enabled: boolean,
+  onSaved?: (code: string) => void,
+) {
   const [autoSaveOn, setAutoSaveOn] = useState(enabled);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSaved = useRef(code);
+  const onSavedRef = useRef(onSaved);
+  onSavedRef.current = onSaved;
 
   const triggerSave = useCallback((newCode: string) => {
     if (!autoSaveOn) return;
@@ -18,6 +25,7 @@ export function useAutoSave(project: Project | null, code: string, enabled: bool
         } else {
           localStorage.setItem('strudel_unsaved_code', newCode);
         }
+        onSavedRef.current?.(newCode);
       }
     }, 2000);
   }, [autoSaveOn, project]);

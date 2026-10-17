@@ -235,3 +235,14 @@ canvas#test-canvas {
   font-size: 1.125rem !important;
   line-height: 1.75 !important;
 }
+
+/* Blockly: hide the flyout scrollbar when its flyout is closed (it otherwise
+   lingers as a sibling element after the toolbox menu closes). */
+.injectionDiv:not(:has(.blocklyFlyout[style*="display: block"])) .blocklyFlyoutScrollbar {
+  display: none !important;
+}
+
+/* Blockly surface should fill its pane and match the Phosphor background. */
+.blocklySvg {
+  background-color: #0a0c0b;
+}

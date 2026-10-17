@@ -128,4 +128,30 @@ describe('project-store', function() {
       expect(result).toBe(true);
     });
   });
+
+  describe('deleteProject cascade', function() {
+    it('removes the project, its sessions and their snapshots', async function() {
+      const sessionMod = await import('./session-store');
+      const project = await mod.createProject({ name: 'Cascade' });
+      const session = await sessionMod.createSession({
+        projectId: project.id,
+        name: 'child session',
+        bpm: 120,
+        duration: 1000,
+        audioBlob: new Blob([]),
+        snapshots: [
+          { id: 'cs1', entityId: 'e0', timestamp: 0, code: 's("bd")', actionType: 'edit' },
+          { id: 'cs2', entityId: 'e0', timestamp: 10, code: 's("hh")', actionType: 'edit' },
+        ],
+        tracks: [],
+      });
+
+      await mod.deleteProject(project.id);
+
+      expect(await mod.getProject(project.id)).toBeUndefined();
+      expect(await sessionMod.getSession(session.id)).toBeUndefined();
+      expect(await sessionMod.getSessionSnapshots(session.id)).toEqual([]);
+      expect(await db.codeSnapshots.count()).toBe(0);
+    });
+  });
 });

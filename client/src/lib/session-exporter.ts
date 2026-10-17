@@ -192,10 +192,15 @@ export function parseSongScript(text: string): SongData {
     }
   }
 
+  // Presence-based parsing: a legitimate `0` must survive the round-trip. Only a
+  // missing (or non-numeric) header falls back to the default.
+  const bpmRaw = meta.bpm !== undefined ? Number(meta.bpm) : NaN;
+  const createdRaw = meta.created !== undefined ? Number(meta.created) : NaN;
+
   return {
     title,
-    bpm: meta.bpm ? Number(meta.bpm) || 120 : 120,
-    createdAt: meta.created ? Number(meta.created) || Date.now() : Date.now(),
+    bpm: Number.isFinite(bpmRaw) ? bpmRaw : 120,
+    createdAt: Number.isFinite(createdRaw) ? createdRaw : Date.now(),
     sources: meta.sources ? meta.sources.split(',').map(s => s.trim()).filter(Boolean) : [],
     samples,
     code: hasMarker ? code.trim() : text,
@@ -215,6 +220,25 @@ export async function exportSongAsFile(session: RecordingSession, snapshots: Cod
     code: finalCode,
   };
   downloadText(`${safeFileName(session.name)}.strudel`, buildSongScript(data), 'text/plain');
+}
+
+/**
+ * Export a project as a runnable Song script without needing a recording.
+ * Used by the exit guard when there is no session to export.
+ */
+export async function exportProjectAsSong(
+  project: Pick<Project, 'name' | 'code' | 'bpm' | 'createdAt'>,
+): Promise<void> {
+  const customs = await collectReferencedCustomSamples(project.code);
+  const data: SongData = {
+    title: project.name,
+    bpm: project.bpm,
+    createdAt: project.createdAt,
+    sources: collectSources(project.code, customs),
+    samples: await toExportedSamples(customs),
+    code: project.code,
+  };
+  downloadText(`${safeFileName(project.name)}.strudel`, buildSongScript(data), 'text/plain');
 }
 
 export async function importSongFromFile(): Promise<Project> {
